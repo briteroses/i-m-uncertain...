@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class MLPProbe(nn.Module):
     def __init__(self, d):
         super().__init__()
@@ -16,7 +17,8 @@ class MLPProbe(nn.Module):
         h = F.relu(self.linear1(x))
         o = self.linear2(h)
         return torch.sigmoid(o)
-    
+
+
 class CCS(object):
     def __init__(self, x0, x1, nepochs=1000, ntries=10, lr=1e-3, batch_size=-1, 
                  verbose=False, device="cuda", linear=True, weight_decay=0.01, var_normalize=False):
@@ -111,6 +113,7 @@ class CCS(object):
 
         # Start training (full batch)
         for epoch in range(self.nepochs):
+            total_loss = 0
             for j in range(nbatches):
                 x0_batch = x0[j*batch_size:(j+1)*batch_size]
                 x1_batch = x1[j*batch_size:(j+1)*batch_size]
@@ -120,13 +123,14 @@ class CCS(object):
 
                 # get the corresponding loss
                 loss = self.get_loss(p0, p1)
+                total_loss += loss.item()
 
                 # update the parameters
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
-        return loss.detach().cpu().item()
+        return total_loss.detach().cpu()
     
     def repeated_train(self):
         best_loss = np.inf

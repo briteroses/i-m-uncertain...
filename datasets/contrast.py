@@ -139,7 +139,7 @@ class ContrastDataset(Dataset):
         return neg_ids, pos_ids, neg_prompt, pos_prompt, true_answer
 
     
-def get_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
+def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
                    model_type="encoder_decoder", use_decoder=False, device="cuda", pin_memory=True, num_workers=1):
     """
     Creates a dataloader for a given dataset (and its split), tokenizer, and prompt index

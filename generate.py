@@ -1,4 +1,8 @@
-from utils import get_parser, load_model, get_dataloader, get_all_hidden_states, save_generations
+from utils.parser import get_parser
+from models.lm import load_model
+from datasets.contrast import get_contrast_dataloader
+from models.hidden_states import get_all_hidden_states
+from utils.save_and_load import save_generations
 
 def main(args):
     # Set up the model and data
@@ -6,7 +10,7 @@ def main(args):
     model, tokenizer, model_type = load_model(args.model_name, args.cache_dir, args.parallelize, args.device)
 
     print("Loading dataloader")
-    dataloader = get_dataloader(args.dataset_name, args.split, tokenizer, args.prompt_idx, batch_size=args.batch_size, 
+    dataloader = get_contrast_dataloader(args.dataset_name, args.split, tokenizer, args.prompt_idx, batch_size=args.batch_size, 
                                 num_examples=args.num_examples, model_type=model_type, use_decoder=args.use_decoder, device=args.device)
 
     # Get the hidden states and labels

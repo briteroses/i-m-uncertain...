@@ -1,5 +1,9 @@
 from sklearn.linear_model import LogisticRegression
+
 from utils import get_parser, load_all_generations, CCS
+from utils.parser import get_parser
+from utils.save_and_load import load_all_generations
+from probes.CCS import CCS
 
 def main(args, generation_args):
     # load hidden states and labels
