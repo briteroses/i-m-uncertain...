@@ -1,6 +1,6 @@
 from utils.parser import get_parser
 from models.lm import load_model
-from datasets.contrast import get_contrast_dataloader
+from data.contrast import get_contrast_dataloader
 from models.hidden_states import get_all_hidden_states
 from utils.save_and_load import save_generations
 

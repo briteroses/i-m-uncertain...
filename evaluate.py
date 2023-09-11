@@ -1,13 +1,13 @@
 from sklearn.linear_model import LogisticRegression
 
-from utils import get_parser, load_all_generations, CCS
 from utils.parser import get_parser
 from utils.save_and_load import load_all_generations
 from probes.CCS import CCS
 
 def main(args, generation_args):
     # load hidden states and labels
-    neg_hs, pos_hs, y = load_all_generations(generation_args)
+    generations = load_all_generations(generation_args)
+    neg_hs, pos_hs, y = tuple(generations.values())
 
     # Make sure the shape is correct
     assert neg_hs.shape == pos_hs.shape

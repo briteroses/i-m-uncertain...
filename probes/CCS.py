@@ -130,7 +130,7 @@ class CCS(object):
                 loss.backward()
                 optimizer.step()
 
-        return total_loss.detach().cpu()
+        return total_loss
     
     def repeated_train(self):
         best_loss = np.inf

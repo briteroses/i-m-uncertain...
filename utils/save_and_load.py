@@ -4,7 +4,7 @@ import numpy as np
 GENERATION_TYPES = [
     "negative_hidden_states",
     "positive_hidden_states",
-    "idk_hidden_states",
+    # "idk_hidden_states",
     "labels"
 ]
 
@@ -47,5 +47,6 @@ def load_all_generations(args):
     for generation_type in GENERATION_TYPES:
         generations.append(load_single_generation(args, generation_type=generation_type))
 
-    generations_dict = dict(zip(['neg_hs', 'pos_hs', 'idk_hs', 'labels'], generations))
+    # generations_dict = dict(zip(['neg_hs', 'pos_hs', 'idk_hs', 'labels'], generations))
+    generations_dict = dict(zip(['neg_hs', 'pos_hs', 'labels'], generations))
     return generations_dict

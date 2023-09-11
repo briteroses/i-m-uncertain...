@@ -110,4 +110,4 @@ class UncertaintyDetectingCCS(CCS):
                 loss.backward()
                 optimizer.step()
 
-        return total_loss.detach().cpu()
+        return total_loss
