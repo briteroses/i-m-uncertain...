@@ -1,2 +1,16 @@
-Logistic regression accuracy: 0.87
-CCS accuracy: 0.85
+Evaluating baseline CCS on gpt2 model and imdb dataset...
+Loading model
+Loading dataloader
+Generating hidden states
+Saving hidden states
+Logistic regression accuracy: 0.535
+CCS accuracy: 0.575
+
+
+
+Evaluating baseline CCS on gpt2 model and amazon_polarity dataset...
+Loading model
+Loading dataloader
+Downloading and preparing dataset amazon_polarity/amazon_polarity to /mnt/xfs/home/branhung/.cache/huggingface/datasets/amazon_polarity/amazon_polarity/3.0.0/a27b32b7e7b88eb274a8fa8ba0f654f1fe998a87c22547557317793b5d2772dc...
+Dataset amazon_polarity downloaded and prepared to /mnt/xfs/home/branhung/.cache/huggingface/datasets/amazon_polarity/amazon_polarity/3.0.0/a27b32b7e7b88eb274a8fa8ba0f654f1fe998a87c22547557317793b5d2772dc. Subsequent calls will reuse this data.
+Generating hidden states

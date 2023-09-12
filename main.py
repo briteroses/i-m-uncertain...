@@ -1,5 +1,11 @@
 import argparse
 
+from utils.parser import get_parser
+from models.lm import MODEL_REGISTRY_NAMES
+from data.contrast import DATASET_REGISTRY
+import _evaluate
+import _generate
+
 def get_parser():
     """
     Returns the parser we will use for generate.py and evaluate.py
@@ -26,3 +32,34 @@ def get_parser():
     parser.add_argument("--save_dir", type=str, default="generated_hidden_states", help="Directory to save the hidden states")
 
     return parser
+
+if __name__ == '__main__':
+    # set up base args
+    parser = get_parser()
+    generation_args = parser.parse_args()
+    parser.add_argument("--nepochs", type=int, default=1000)
+    parser.add_argument("--ntries", type=int, default=10)
+    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--ccs_batch_size", type=int, default=-1)
+    parser.add_argument("--verbose", action="store_true")
+    parser.add_argument("--ccs_device", type=str, default="cuda")
+    parser.add_argument("--linear", action="store_true")
+    parser.add_argument("--weight_decay", type=float, default=0.01)
+    parser.add_argument("--var_normalize", action="store_true")
+    args = parser.parse_args()
+
+    # iterate through all models and datasets via argparse namespace
+    for model_name in MODEL_REGISTRY_NAMES:
+        for dataset_name in DATASET_REGISTRY:
+            setattr(generation_args, 'model_name', model_name)
+            setattr(args, 'model_name', model_name)
+            setattr(generation_args, 'dataset_name', dataset_name)
+            setattr(args, 'dataset_name', dataset_name)
+            # parser.parse_args(args=['--model_name', model_name], namespace=generation_args)
+            # parser.parse_args(args=['--model_name', model_name], namespace=args)
+            # parser.parse_args(args=['--dataset_name', dataset_name], namespace=generation_args)
+            # parser.parse_args(args=['--dataset_name', dataset_name], namespace=args)
+            print(f"Evaluating baseline CCS on {model_name} model and {dataset_name} dataset...")
+            _generate.main(generation_args)
+            _evaluate.main(args, generation_args)
+            print("\n\n")

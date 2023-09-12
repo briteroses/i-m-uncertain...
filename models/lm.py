@@ -1,36 +1,44 @@
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForMaskedLM, AutoModelForCausalLM
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    T5ForConditionalGeneration,
+    GPTNeoForCausalLM,
+    AutoConfig,
+    GPT2LMHeadModel,
+    GPT2Tokenizer,
+    AutoModel,
+    AutoModelForSeq2SeqLM,
+    AutoModelForMaskedLM,
+    AutoModelWithLMHead,
+    AutoModelForSequenceClassification
+)
 
-model_nicknames = {
-    "gpt-j": "EleutherAI/gpt-j-6B",
-    "T0pp": "bigscience/T0pp",
-    "unifiedqa": "allenai/unifiedqa-t5-11b",
-    "T5": "t5-11b",
-    "deberta-mnli": "microsoft/deberta-xxlarge-v2-mnli",
-    "deberta": "microsoft/deberta-xxlarge-v2",
-    "roberta-mnli": "roberta-large-mnli",
+MODEL_REGISTRY = {
+    "gpt2": ("gpt2", "decoder", GPT2LMHeadModel, GPT2Tokenizer),
+    "gpt2-medium": ("gpt2-medium", "decoder", GPT2LMHeadModel, GPT2Tokenizer),
+    "gpt2-large": ("gpt2-large", "decoder", GPT2LMHeadModel, GPT2Tokenizer),
+    "gpt2-xl": ("gpt2-xl", "decoder", GPT2LMHeadModel, GPT2Tokenizer),
+    "gpt-neo": ("EleutherAI/gpt-neo-2.7B", "decoder", AutoModelForCausalLM, AutoTokenizer),
+    "gpt-j": ("EleutherAI/gpt-j-6B", "decoder", AutoModelForCausalLM, AutoTokenizer),
+    "T0pp": ("bigscience/T0pp", "encoder_decoder", AutoModelForSeq2SeqLM, AutoTokenizer),
+    "unifiedqa": ("allenai/unifiedqa-t5-11b", "encoder_decoder", T5ForConditionalGeneration, AutoTokenizer),
+    "T5": ("t5-11b", "encoder_decoder", AutoModelWithLMHead, AutoTokenizer),
+    "deberta-mnli": ("microsoft/deberta-xxlarge-v2-mnli", "encoder", AutoModelForSequenceClassification, AutoTokenizer),
+    "deberta": ("microsoft/deberta-xxlarge-v2", "encoder", AutoModelForSequenceClassification, AutoTokenizer),
+    "roberta-mnli": ("roberta-large-mnli", "encoder", AutoModelForSequenceClassification, AutoTokenizer),
 }
+
+MODEL_REGISTRY_NAMES = list(MODEL_REGISTRY.keys())
 
 def load_model(model_name, cache_dir=None, parallelize=False, device="cuda"):
     """
     Loads a model and its corresponding tokenizer, either parallelized across GPUs (if the model permits that; usually just use this for T5-based models) or on a single GPU
     """
-    full_model_name = model_nicknames.get(model_name, model_name)
+    assert model_name in MODEL_REGISTRY, f"invalid model name. current implementation only supports: {MODEL_REGISTRY_NAMES}"
+    full_model_name, model_type, automodeler, autotoken = MODEL_REGISTRY[model_name]
 
-    # use the right automodel, and get the corresponding model type
-    try:
-        model = AutoModelForSeq2SeqLM.from_pretrained(full_model_name, cache_dir=cache_dir)
-        model_type = "encoder_decoder"
-    except:
-        try:
-            model = AutoModelForMaskedLM.from_pretrained(full_model_name, cache_dir=cache_dir)
-            model_type = "encoder"
-        except:
-            model = AutoModelForCausalLM.from_pretrained(full_model_name, cache_dir=cache_dir)
-            model_type = "decoder"
-        
-    # specify model_max_length (the max token length) to be 512 to ensure that padding works 
-    # (it's not set by default for e.g. DeBERTa, but it's necessary for padding to work properly)
-    tokenizer = AutoTokenizer.from_pretrained(full_model_name, cache_dir=cache_dir, model_max_length=512)
+    model = automodeler.from_pretrained(full_model_name, cache_dir=cache_dir)
+    tokenizer = autotoken.from_pretrained(full_model_name, cache_dir=cache_dir, model_max_length=512)
     model.eval()
 
     # put on the correct device

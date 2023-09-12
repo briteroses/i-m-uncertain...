@@ -5,6 +5,19 @@ from torch.utils.data import Dataset, DataLoader
 from promptsource.templates import DatasetTemplates
 from datasets import load_dataset
 
+DATASET_REGISTRY = [
+    'imdb',
+    'amazon_polarity',
+    'ag-news',
+    'dbpedia-14',
+    'copa',
+    'rte',
+    'boolq',
+    'qnli',
+    'piqa',
+    'story-cloze'
+]
+
 class ContrastDataset(Dataset):
     """
     Given a dataset and tokenizer (from huggingface), along with a collection of prompts for that dataset from promptsource and a corresponding prompt index, 
@@ -126,6 +139,9 @@ class ContrastDataset(Dataset):
         # (for example, label 0 might be mapped to "no" and label 1 might be mapped to "yes")
         neg_prompt, pos_prompt = self.prompt.apply(neg_example), self.prompt.apply(pos_example)
 
+        if index == 0:
+            print(neg_prompt, file=sys.stderr)
+            print(pos_prompt, file=sys.stderr)
         # tokenize
         neg_ids, pos_ids = self.encode(neg_prompt), self.encode(pos_prompt)
 
