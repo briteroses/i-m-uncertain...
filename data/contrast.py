@@ -208,16 +208,13 @@ def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, use_cust
                                        device=device)
 
     # get a random permutation of the indices; we'll take the first num_examples of these that do not get truncated
+    # then, we ignore examples that would be truncated (since this messes up contrast pairs),
+    # up until we reach the desired number of examples to keep
     random_idxs = np.random.permutation(len(contrast_dataset))
-
-    # remove examples that would be truncated (since this messes up contrast pairs)
-    prompt_name_list = list(all_prompts.name_to_id_mapping.keys())
-    prompt = all_prompts[prompt_name_list[prompt_idx]]
     keep_idxs = []
     for idx in random_idxs:
-        question, answer = prompt.apply(raw_dataset[int(idx)])
-        input_text = question + " " + answer
-        if len(tokenizer.encode(input_text, truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
+        neg_ids, pos_ids, _, _, _ = contrast_dataset[int(idx)]
+        if len(neg_ids) < tokenizer.model_max_length - 2 and len(pos_ids) < tokenizer.model_max_length - 2:
             keep_idxs.append(idx)
             if len(keep_idxs) >= num_examples:
                 break
