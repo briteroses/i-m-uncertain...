@@ -167,13 +167,13 @@ class ContrastDataset(Dataset):
 
     
 def getLoadName(set_name):
-    if set_name in ["imdb", "amazon-polarity", "ag-news", "dbpedia-14", "piqa"]:
-        return [set_name.replace("-", "_")]
+    if set_name in ["imdb", "amazon_polarity", "ag_news", "dbpedia_14", "piqa"]:
+        return [set_name]
     elif set_name in ["copa", "rte", "boolq"]:
-        return ["super_glue", set_name.replace("-", "_")]
+        return ["super_glue", set_name]
     elif set_name in ["qnli"]:
-        return ["glue", set_name.replace("-", "_")]
-    elif set_name == "story-cloze":
+        return ["glue", set_name]
+    elif set_name == "story_cloze":
         return ["story_cloze", "2016"]
 
 

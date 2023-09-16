@@ -3,8 +3,8 @@ Loading model
 Loading dataloader
 Generating hidden states
 Saving hidden states
-Logistic regression accuracy: 0.525
-CCS accuracy: 0.585
+Logistic regression accuracy: 0.51
+CCS accuracy: 0.54
 
 
 
@@ -13,8 +13,8 @@ Loading model
 Loading dataloader
 Generating hidden states
 Saving hidden states
-Logistic regression accuracy: 0.555
-CCS accuracy: 0.52
+Logistic regression accuracy: 0.54
+CCS accuracy: 0.525
 
 
 
@@ -22,24 +22,3 @@ Evaluating baseline CCS on gpt2 model and ag_news dataset ...
 Loading model
 Loading dataloader
 Generating hidden states
-Saving hidden states
-Logistic regression accuracy: 0.4
-CCS accuracy: 0.75
-
-
-
-Evaluating baseline CCS on gpt2 model and dbpedia_14 dataset ...
-Loading model
-Loading dataloader
-Downloading and preparing dataset dbpedia_14/dbpedia_14 to /mnt/xfs/home/branhung/.cache/huggingface/datasets/dbpedia_14/dbpedia_14/2.0.0/01dab9e10d969eadcdbc918be5a09c9190a24caeae33b10eee8f367a1e3f1f0c...
-Dataset dbpedia_14 downloaded and prepared to /mnt/xfs/home/branhung/.cache/huggingface/datasets/dbpedia_14/dbpedia_14/2.0.0/01dab9e10d969eadcdbc918be5a09c9190a24caeae33b10eee8f367a1e3f1f0c. Subsequent calls will reuse this data.
-Generating hidden states
-Saving hidden states
-Logistic regression accuracy: 0.19
-CCS accuracy: 0.9299999999999999
-
-
-
-Evaluating baseline CCS on gpt2 model and copa dataset ...
-Loading model
-Loading dataloader

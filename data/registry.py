@@ -1,14 +1,14 @@
 DATASET_LABEL_REGISTRY = {
     "imdb": ["negative", "positive"], # This is for normal IMDB
-    "amazon-polarity": ["negative", "positive"],
-    "ag-news": ["politics", "sports", "business", "technology"],
-    "dbpedia-14": ["company", "educational institution", "artist", "athlete", "office holder", "mean of transportation", "building", "natural place", "village", "animal",  "plant",  "album",  "film",  "written work"],
+    "amazon_polarity": ["negative", "positive"],
+    "ag_news": ["politics", "sports", "business", "technology"],
+    "dbpedia_14": ["company", "educational institution", "artist", "athlete", "office holder", "mean of transportation", "building", "natural place", "village", "animal",  "plant",  "album",  "film",  "written work"],
     "copa": ["choice 1", "choice 2"],
     "rte": ["yes", "no"],   # whether entail
     "boolq": ["false", "true"],
     "qnli": ["yes", "no"],  # represent whether entail
     "piqa": ["solution 1", "solution 2"],
-    "story-cloze": ["choice 1", "choice 2"],
+    "story_cloze": ["choice 1", "choice 2"],
 }
 
 MODEL_TYPE_REGISTRY = {
@@ -35,13 +35,13 @@ PROMPT_DICT = {
         ["Consider the following example: ''' {} '''\nBetween {} and {}, which is the sentiment of this example?", [
             "text", "neg_label", "pos_label"]],
     ],
-    "amazon-polarity": [
+    "amazon_polarity": [
         ["Consider the following example: ''' {} '''\nBetween {} and {}, the sentiment of this example is", [
             "content", "neg_label", "pos_label"]],
         ["Consider the following example: ''' {} '''\nBetween {} and {}, which is the sentiment of this example?", [
             "content", "neg_label", "pos_label"]],
     ],
-    "ag-news": [
+    "ag_news": [
         ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, the topic of this example is ", [
             "text", "neg_label", "pos_label"]],
         ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, what is the topic of this example?", [
@@ -57,7 +57,7 @@ PROMPT_DICT = {
         ["{}\nWhich section of a newspaper would this article likely appear in, choice 1: {}, or choice 2: {}?", [
             "text", "neg_label", "pos_label"]],
     ],
-    "dbpedia-14": [
+    "dbpedia_14": [
         ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, the topic of this example is ", [
             "content", "neg_label", "pos_label"]],
         ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, what is the topic of this example?", [
@@ -73,7 +73,7 @@ PROMPT_DICT = {
          ["content", "neg_label", "pos_label"]],
         ["{}\nWhat label best describes this paragraph, choice 1: {}, or choice 2: {}?", ["content", "neg_label", "pos_label"]],
     ],
-    "story-cloze": [
+    "story_cloze": [
         ["Consider the following story: ''' {} {} {} {} '''\nChoice 1: {}\nChoice 2: {}\nWhich is the more plausible ending of this story, choice 1 or choice 2?",
          ["input_sentence_1", "input_sentence_2", "input_sentence_3", "input_sentence_4", "sentence_quiz1", "sentence_quiz2"]],
         ["Consider the following story: ''' {} {} {} {} '''\nChoice 1: {}\nChoice 2: {}\nWhich is the more plausible ending of this story?",
