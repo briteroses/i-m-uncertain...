@@ -30,6 +30,8 @@ class CustomPrompt(DatasetTemplates):
                 formatter.append(example[example_feature])
         question = self.formatted_prompt.format(*formatter)
         answer = DATASET_LABEL_REGISTRY[self.dataset_name][example[self.label_name]]
+        print(question, file=sys.stderr)
+        print(answer, file=sys.stderr)
         return question, answer
 
 class ContrastDataset(Dataset):
@@ -101,7 +103,9 @@ class ContrastDataset(Dataset):
         """
         Format the input ids for encoder-only models; standard formatting.
         """
-        combined_input = question + " " + answer 
+        combined_input = question + " " + answer
+        print("COMBINED", file=sys.stderr)
+        print(combined_input, file=sys.stderr)
         input_ids = self.tokenizer(combined_input, truncation=True, padding="max_length", return_tensors="pt")
 
         return input_ids

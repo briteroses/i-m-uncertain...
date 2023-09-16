@@ -6,4 +6,4 @@
 #SBATCH --output=../sbatches/logs/debug/ccs.out
 #SBATCH --error=../sbatches/logs/debug/ccs.err
 
-python ../main.py --num_examples 400 --batch_size 40
+python ../main.py --num_examples 400 --batch_size 40 --use_custom_prompt True
