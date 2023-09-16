@@ -9,13 +9,14 @@ from promptsource.templates import DatasetTemplates
 from datasets import load_dataset
 
 from data.prompts import negAndPosLabels
-from data.registry import DATASET_LABEL_REGISTRY, MODEL_TYPE_REGISTRY, get_label_name_for_dataset
+from data.registry import DATASET_LABEL_REGISTRY, MODEL_TYPE_REGISTRY, get_label_name_for_dataset, PROMPT_DICT
 
 
 class CustomPrompt(DatasetTemplates):
     def __init__(self, dataset_name, formatted_prompt, format_list):
         super().__init__()
         self.dataset_name = dataset_name
+        self.label_name = get_label_name_for_dataset(self.dataset_name)
         self.formatted_prompt = formatted_prompt
         self.format_list = format_list
     
@@ -27,7 +28,9 @@ class CustomPrompt(DatasetTemplates):
                 formatter.append(write_label)
             else:
                 formatter.append(example[example_feature])
-        return self.formatted_prompt.format(*formatter)
+        question = self.formatted_prompt.format(*formatter)
+        answer = DATASET_LABEL_REGISTRY[self.dataset_name][example[self.label_name]]
+        return question, answer
 
 class ContrastDataset(Dataset):
     """
@@ -176,7 +179,7 @@ class ContrastDataset(Dataset):
         return neg_ids, pos_ids, neg_prompt, pos_prompt, ground_truth_label
 
     
-def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, custom_prompt=False,
+def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, use_custom_prompt=False,
                             batch_size=16, num_examples=1000,
                             model_name="deberta", use_decoder=False,
                             device="cuda", pin_memory=True, num_workers=1):
@@ -189,9 +192,14 @@ def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, custom_p
     raw_dataset = load_dataset(dataset_name)[split]
 
     # load all the prompts for that dataset
-    all_prompts = DatasetTemplates(dataset_name)
-    prompt_name_list = list(all_prompts.name_to_id_mapping.keys())
-    source_prompt = all_prompts[prompt_name_list[prompt_idx]]
+    if use_custom_prompt:
+        assert prompt_idx < len(PROMPT_DICT[dataset_name]), "prompt index out of range for our custom prompts"
+        formatted_prompt, format_list = PROMPT_DICT[dataset_name][prompt_idx]
+        source_prompt = CustomPrompt(dataset_name, formatted_prompt, format_list)
+    else:
+        all_prompts = DatasetTemplates(dataset_name)
+        prompt_name_list = list(all_prompts.name_to_id_mapping.keys())
+        source_prompt = all_prompts[prompt_name_list[prompt_idx]]
 
     # create the ConstrastDataset
     contrast_dataset = ContrastDataset(raw_dataset, tokenizer, source_prompt, 

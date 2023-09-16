@@ -10,7 +10,7 @@ def main(args):
     model, tokenizer, model_type = load_model(args.model_name, args.cache_dir, args.parallelize, args.device)
 
     print("Loading dataloader")
-    dataloader = get_contrast_dataloader(args.dataset_name, args.split, tokenizer, args.prompt_idx, custom_prompt=args.custom_prompt,
+    dataloader = get_contrast_dataloader(args.dataset_name, args.split, tokenizer, args.prompt_idx, use_custom_prompt=args.use_custom_prompt,
                                         batch_size=args.batch_size, num_examples=args.num_examples,
                                         model_name=args.model_name, use_decoder=args.use_decoder, device=args.device)
 

@@ -27,3 +27,66 @@ MODEL_TYPE_REGISTRY = {
 }
 
 get_label_name_for_dataset = lambda dataset_name: "label" if dataset_name != "story-cloze" else "answer_right_ending"
+
+PROMPT_DICT = {
+    "imdb": [
+        ["Consider the following example: ''' {} '''\nBetween {} and {}, the sentiment of this example is", [
+            "text", "neg_label", "pos_label"]],
+        ["Consider the following example: ''' {} '''\nBetween {} and {}, which is the sentiment of this example?", [
+            "text", "neg_label", "pos_label"]],
+    ],
+    "amazon-polarity": [
+        ["Consider the following example: ''' {} '''\nBetween {} and {}, the sentiment of this example is", [
+            "content", "neg_label", "pos_label"]],
+        ["Consider the following example: ''' {} '''\nBetween {} and {}, which is the sentiment of this example?", [
+            "content", "neg_label", "pos_label"]],
+    ],
+    "ag-news": [
+        ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, the topic of this example is ", [
+            "text", "neg_label", "pos_label"]],
+        ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, what is the topic of this example?", [
+            "text", "neg_label", "pos_label"]],
+        ["Consider the following example: ''' {} '''\nWhich is the topic of this example, choice 1: {}, or choice 2: {}?", [
+            "text", "neg_label", "pos_label"]],
+        ["{}\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, the topic of this example is ",
+         ["text", "neg_label", "pos_label"]],
+        ["{}\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, what is the topic of this example?",
+         ["text", "neg_label", "pos_label"]],
+        ["{}\nWhich is the topic of this example, choice 1: {}, or choice 2: {}?", ["text", "neg_label", "pos_label"]],
+        ["{}\nWhat label best describes this news article, choice 1: {}, or choice 2: {}?", ["text", "neg_label", "pos_label"]],
+        ["{}\nWhich section of a newspaper would this article likely appear in, choice 1: {}, or choice 2: {}?", [
+            "text", "neg_label", "pos_label"]],
+    ],
+    "dbpedia-14": [
+        ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, the topic of this example is ", [
+            "content", "neg_label", "pos_label"]],
+        ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, what is the topic of this example?", [
+            "content", "neg_label", "pos_label"]],
+        ["Consider the following example: ''' {} '''\nWhich is the topic of this example, choice 1: {}, or choice 2: {}?", [
+            "content", "neg_label", "pos_label"]],
+        ["{}\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, the topic of this example is ",
+         ["content", "neg_label", "pos_label"]],
+        ["{}\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, what is the topic of this example?",
+         ["content", "neg_label", "pos_label"]],
+        ["{}\nWhich is the topic of this example, choice 1: {}, or choice 2: {}?", ["content", "neg_label", "pos_label"]],
+        ["{}\nWhat category does the paragraph belong to, choice 1: {}, or choice 2: {}?",
+         ["content", "neg_label", "pos_label"]],
+        ["{}\nWhat label best describes this paragraph, choice 1: {}, or choice 2: {}?", ["content", "neg_label", "pos_label"]],
+    ],
+    "story-cloze": [
+        ["Consider the following story: ''' {} {} {} {} '''\nChoice 1: {}\nChoice 2: {}\nWhich is the more plausible ending of this story, choice 1 or choice 2?",
+         ["input_sentence_1", "input_sentence_2", "input_sentence_3", "input_sentence_4", "sentence_quiz1", "sentence_quiz2"]],
+        ["Consider the following story: ''' {} {} {} {} '''\nChoice 1: {}\nChoice 2: {}\nWhich is the more plausible ending of this story?",
+         ["input_sentence_1", "input_sentence_2", "input_sentence_3", "input_sentence_4", "sentence_quiz1", "sentence_quiz2"]],
+        ["{} {} {} {}\nChoice 1: {}\nChoice 2: {}\nWhich is the more plausible ending of this story, choice 1 or choice 2?",
+         ["input_sentence_1", "input_sentence_2", "input_sentence_3", "input_sentence_4", "sentence_quiz1", "sentence_quiz2"]],
+    ],
+    "copa": [
+        ["Consider the following premise: ''' {} ''' Choice 1: {}\nChoice 2: {}\nQ: Which one is more likely to be the {}, choice 1 or choice 2?",
+            ["premise", "choice1", "choice2", "question"]],
+    ],
+    "rte": [
+        ["{}\nQuestion: Does this imply that \"{}\", yes or no?",
+            ["premise", "hypothesis"]],
+    ],
+}
