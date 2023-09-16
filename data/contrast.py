@@ -14,7 +14,7 @@ from data.registry import DATASET_LABEL_REGISTRY, MODEL_TYPE_REGISTRY, get_label
 
 class CustomPrompt(DatasetTemplates):
     def __init__(self, dataset_name, formatted_prompt, format_list):
-        super().__init__()
+        super().__init__(dataset_name)
         self.dataset_name = dataset_name
         self.label_name = get_label_name_for_dataset(self.dataset_name)
         self.formatted_prompt = formatted_prompt
@@ -192,11 +192,12 @@ def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, use_cust
     raw_dataset = load_dataset(dataset_name)[split]
 
     # load all the prompts for that dataset
-    if use_custom_prompt:
-        assert prompt_idx < len(PROMPT_DICT[dataset_name]), "prompt index out of range for our custom prompts"
+    if use_custom_prompt and prompt_idx < len(PROMPT_DICT[dataset_name]):
         formatted_prompt, format_list = PROMPT_DICT[dataset_name][prompt_idx]
         source_prompt = CustomPrompt(dataset_name, formatted_prompt, format_list)
     else:
+        print("prompt index was outside of provided custom prompts; defaulting to promptsource...", file=sys.stderr)
+        prompt_idx = 0
         all_prompts = DatasetTemplates(dataset_name)
         prompt_name_list = list(all_prompts.name_to_id_mapping.keys())
         source_prompt = all_prompts[prompt_name_list[prompt_idx]]
