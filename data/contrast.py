@@ -20,10 +20,14 @@ class CustomPrompt(DatasetTemplates):
         self.format_list = format_list
     
     def apply(self, example):
+        formatter = []
         for example_feature in self.format_list:
-            if example_feature in ("0", "1"):
-                # DATASET_LABEL_REGISTRY
-                pass
+            if example_feature in ("neg_label", "pos_label"):
+                write_label = DATASET_LABEL_REGISTRY[self.dataset_name][example[example_feature]]
+                formatter.append(write_label)
+            else:
+                formatter.append(example[example_feature])
+        return self.formatted_prompt.format(*formatter)
 
 class ContrastDataset(Dataset):
     """
@@ -149,17 +153,16 @@ class ContrastDataset(Dataset):
 
         neg_example, pos_example = deepcopy(data), deepcopy(data)
         neg_example[label_name] = neg_label
+        neg_example["neg_label"] = neg_label
+        neg_example["pos_label"] = pos_label
         pos_example[label_name] = pos_label
-        neg_example['garbage'] = 'lorem ipsum'
-        pos_example['nonsense'] = 'lorem ipsum'
+        pos_example["neg_label"] = neg_label
+        pos_example["pos_label"] = pos_label
 
         # construct contrast pairs by answering the prompt with the two different possible labels
         # (for example, label 0 might be mapped to "no" and label 1 might be mapped to "yes")
         neg_prompt, pos_prompt = self.prompt.apply(neg_example), self.prompt.apply(pos_example)
 
-        if index == 0:
-            print(neg_prompt, file=sys.stderr)
-            print(pos_prompt, file=sys.stderr)
         # tokenize
         neg_ids, pos_ids = self.encode(neg_prompt), self.encode(pos_prompt)
 
