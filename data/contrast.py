@@ -102,7 +102,7 @@ class ContrastDataset(Dataset):
         Format the input ids for encoder-only models; standard formatting.
         """
         combined_input = question + " " + answer 
-        input_ids = self.tokenizer(combined_input, truncation=True, padding="max_length", return_tensors="pt")
+        input_ids = self.tokenizer(combined_input, truncation=False, padding="max_length", return_tensors="pt")
 
         return input_ids
 
@@ -113,7 +113,7 @@ class ContrastDataset(Dataset):
         This is the same as get_encoder_input_ids except that we add the EOS token at the end of the input (which apparently can matter)
         """
         combined_input = question + " " + answer + self.tokenizer.eos_token
-        input_ids = self.tokenizer(combined_input, truncation=True, padding="max_length", return_tensors="pt")
+        input_ids = self.tokenizer(combined_input, truncation=False, padding="max_length", return_tensors="pt")
 
         return input_ids
 
@@ -125,12 +125,12 @@ class ContrastDataset(Dataset):
         """
         if self.use_decoder:
             # feed the same question to the encoder but different answers to the decoder to construct contrast pairs
-            input_ids = self.tokenizer(question, truncation=True, padding="max_length", return_tensors="pt")
-            decoder_input_ids = self.tokenizer(answer, truncation=True, padding="max_length", return_tensors="pt")
+            input_ids = self.tokenizer(question, truncation=False, padding="max_length", return_tensors="pt")
+            decoder_input_ids = self.tokenizer(answer, truncation=False, padding="max_length", return_tensors="pt")
         else:
             # include both the question and the answer in the input for the encoder
             # feed the empty string to the decoder (i.e. just ignore it -- but it needs an input or it'll throw an error)
-            input_ids = self.tokenizer(question, answer, truncation=True, padding="max_length", return_tensors="pt")
+            input_ids = self.tokenizer(question, answer, truncation=False, padding="max_length", return_tensors="pt")
             decoder_input_ids = self.tokenizer("", return_tensors="pt")
         
         # move everything into input_ids so that it's easier to pass to the model
@@ -168,6 +168,8 @@ class ContrastDataset(Dataset):
 
         # tokenize
         neg_ids, pos_ids = self.encode(neg_prompt), self.encode(pos_prompt)
+        print(neg_ids, file=sys.stderr)
+        print(pos_ids, file=sys.stderr)
 
         # verify these are different (e.g. tokenization didn't cut off the difference between them)
         if self.use_decoder and MODEL_TYPE_REGISTRY[self.model_name] == "encoder_decoder":
