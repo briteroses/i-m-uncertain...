@@ -32,7 +32,7 @@ class ContrastDataset(Dataset):
     
     Truncates examples larger than max_len, which can mess up contrast pairs, so make sure to only give it examples that won't be truncated.
     """
-    def __init__(self, raw_dataset, tokenizer, prompt, all_prompts, prompt_idx, 
+    def __init__(self, raw_dataset, tokenizer, prompt,
                  model_name="deberta", dataset_name="imdb", use_decoder=False, device="cuda"):
 
         # data and tokenizer
@@ -188,10 +188,10 @@ def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, custom_p
     # load all the prompts for that dataset
     all_prompts = DatasetTemplates(dataset_name)
     prompt_name_list = list(all_prompts.name_to_id_mapping.keys())
-    all_prompts[prompt_name_list[prompt_idx]]
+    source_prompt = all_prompts[prompt_name_list[prompt_idx]]
 
     # create the ConstrastDataset
-    contrast_dataset = ContrastDataset(raw_dataset, tokenizer, all_prompts, prompt_idx, 
+    contrast_dataset = ContrastDataset(raw_dataset, tokenizer, source_prompt, 
                                        model_name=model_name, dataset_name=dataset_name, use_decoder=use_decoder, 
                                        device=device)
 
