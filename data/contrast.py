@@ -1,3 +1,6 @@
+import sys
+from copy import deepcopy
+
 import numpy as np
 import torch
 
@@ -5,18 +8,22 @@ from torch.utils.data import Dataset, DataLoader
 from promptsource.templates import DatasetTemplates
 from datasets import load_dataset
 
-DATASET_REGISTRY = [
-    'imdb',
-    'amazon_polarity',
-    'ag-news',
-    'dbpedia-14',
-    'copa',
-    'rte',
-    'boolq',
-    'qnli',
-    'piqa',
-    'story-cloze'
-]
+from data.prompts import negAndPosLabels
+from data.registry import DATASET_LABEL_REGISTRY, MODEL_TYPE_REGISTRY, get_label_name_for_dataset
+
+
+class CustomPrompt(DatasetTemplates):
+    def __init__(self, dataset_name, formatted_prompt, format_list):
+        super().__init__()
+        self.dataset_name = dataset_name
+        self.formatted_prompt = formatted_prompt
+        self.format_list = format_list
+    
+    def apply(self, example):
+        for example_feature in self.format_list:
+            if example_feature in ("0", "1"):
+                # DATASET_LABEL_REGISTRY
+                pass
 
 class ContrastDataset(Dataset):
     """
@@ -25,8 +32,8 @@ class ContrastDataset(Dataset):
     
     Truncates examples larger than max_len, which can mess up contrast pairs, so make sure to only give it examples that won't be truncated.
     """
-    def __init__(self, raw_dataset, tokenizer, all_prompts, prompt_idx, 
-                 model_type="encoder_decoder", use_decoder=False, device="cuda"):
+    def __init__(self, raw_dataset, tokenizer, prompt, all_prompts, prompt_idx, 
+                 model_name="deberta", dataset_name="imdb", use_decoder=False, device="cuda"):
 
         # data and tokenizer
         self.raw_dataset = raw_dataset
@@ -36,17 +43,22 @@ class ContrastDataset(Dataset):
         self.device = device
         
         # for formatting the answers
-        self.model_type = model_type
+        assert model_name in MODEL_TYPE_REGISTRY.keys(), "invalid model name given"
+        self.model_name = model_name
         self.use_decoder = use_decoder
         if self.use_decoder:
-            assert self.model_type != "encoder"
+            assert MODEL_TYPE_REGISTRY[self.model_name] != "encoder"
+
+        self.dataset_name = dataset_name
 
         # prompt
-        prompt_name_list = list(all_prompts.name_to_id_mapping.keys())
-        self.prompt = all_prompts[prompt_name_list[prompt_idx]]
+        self.prompt = prompt
 
     def __len__(self):
         return len(self.raw_dataset)
+    
+    def change_prompt(self, prompt):
+        self.prompt = prompt
 
     def encode(self, nl_prompt):
         """
@@ -63,9 +75,9 @@ class ContrastDataset(Dataset):
         question, answer = nl_prompt
         
         # tokenize the question and answer (depending upon the model type and whether self.use_decoder is True)
-        if self.model_type == "encoder_decoder":
+        if MODEL_TYPE_REGISTRY[self.model_name] == "encoder_decoder":
             input_ids = self.get_encoder_decoder_input_ids(question, answer)
-        elif self.model_type == "encoder":
+        elif MODEL_TYPE_REGISTRY[self.model_name] == "encoder":
             input_ids = self.get_encoder_input_ids(question, answer)
         else:
             input_ids = self.get_decoder_input_ids(question, answer)
@@ -124,16 +136,22 @@ class ContrastDataset(Dataset):
     def __getitem__(self, index):
         # get the original example
         data = self.raw_dataset[int(index)]
-        text, true_answer = data["text"], data["label"]
+        label_name = get_label_name_for_dataset(self.dataset_name)
+        ground_truth_label = data[label_name]
 
         # get the possible labels
         # (for simplicity assume the binary case for contrast pairs)
-        label_list = self.prompt.get_answer_choices_list(data)
-        assert len(label_list) == 2, print("Make sure there are only two possible answers! Actual number of answers:", label_list)
+        # label_list = self.prompt.get_answer_choices_list(data)
+        # assert len(label_list) == 2, print("Make sure there are only two possible answers! Actual number of answers:", label_list)
 
         # reconvert to dataset format but with fake/candidate labels to create the contrast pair
-        neg_example = {"text": text, "label": 0}
-        pos_example = {"text": text, "label": 1}
+        neg_label, pos_label = negAndPosLabels(ground_truth_label, self.dataset_name)
+
+        neg_example, pos_example = deepcopy(data), deepcopy(data)
+        neg_example[label_name] = neg_label
+        pos_example[label_name] = pos_label
+        neg_example['garbage'] = 'lorem ipsum'
+        pos_example['nonsense'] = 'lorem ipsum'
 
         # construct contrast pairs by answering the prompt with the two different possible labels
         # (for example, label 0 might be mapped to "no" and label 1 might be mapped to "yes")
@@ -146,17 +164,19 @@ class ContrastDataset(Dataset):
         neg_ids, pos_ids = self.encode(neg_prompt), self.encode(pos_prompt)
 
         # verify these are different (e.g. tokenization didn't cut off the difference between them)
-        if self.use_decoder and self.model_type == "encoder_decoder":
+        if self.use_decoder and MODEL_TYPE_REGISTRY[self.model_name] == "encoder_decoder":
             assert (neg_ids["decoder_input_ids"] - pos_ids["decoder_input_ids"]).sum() != 0, print("The decoder_input_ids for the contrast pairs are the same!", neg_ids, pos_ids)
         else:
             assert (neg_ids["input_ids"] - pos_ids["input_ids"]).sum() != 0, print("The input_ids for the contrast pairs are the same!", neg_ids, pos_ids)
 
         # return the tokenized inputs, the text prompts, and the true label
-        return neg_ids, pos_ids, neg_prompt, pos_prompt, true_answer
+        return neg_ids, pos_ids, neg_prompt, pos_prompt, ground_truth_label
 
     
-def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
-                   model_type="encoder_decoder", use_decoder=False, device="cuda", pin_memory=True, num_workers=1):
+def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, custom_prompt=False,
+                            batch_size=16, num_examples=1000,
+                            model_name="deberta", use_decoder=False,
+                            device="cuda", pin_memory=True, num_workers=1):
     """
     Creates a dataloader for a given dataset (and its split), tokenizer, and prompt index
 
@@ -167,10 +187,12 @@ def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_si
 
     # load all the prompts for that dataset
     all_prompts = DatasetTemplates(dataset_name)
+    prompt_name_list = list(all_prompts.name_to_id_mapping.keys())
+    all_prompts[prompt_name_list[prompt_idx]]
 
     # create the ConstrastDataset
     contrast_dataset = ContrastDataset(raw_dataset, tokenizer, all_prompts, prompt_idx, 
-                                       model_type=model_type, use_decoder=use_decoder, 
+                                       model_name=model_name, dataset_name=dataset_name, use_decoder=use_decoder, 
                                        device=device)
 
     # get a random permutation of the indices; we'll take the first num_examples of these that do not get truncated

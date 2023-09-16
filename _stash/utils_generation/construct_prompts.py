@@ -355,8 +355,6 @@ def genCandidate(label, label_num):
 
         return lbl, selection
 
-
-
 def checkLengthExceed(tokenizer, str_list):
     for s in str_list:
         if len(tokenizer(s).input_ids) > filter_length:
