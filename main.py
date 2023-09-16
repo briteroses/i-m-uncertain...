@@ -21,17 +21,16 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # iterate through all models and datasets via argparse namespace
-    for model_name in ['deberta']:#MODEL_TYPE_REGISTRY.keys():
-        for dataset_name in ['imdb']:#DATASET_LABEL_REGISTRY.keys():
-            setattr(generation_args, 'model_name', model_name)
-            setattr(args, 'model_name', model_name)
-            setattr(generation_args, 'dataset_name', dataset_name)
-            setattr(args, 'dataset_name', dataset_name)
-            # parser.parse_args(args=['--model_name', model_name], namespace=generation_args)
-            # parser.parse_args(args=['--model_name', model_name], namespace=args)
-            # parser.parse_args(args=['--dataset_name', dataset_name], namespace=generation_args)
-            # parser.parse_args(args=['--dataset_name', dataset_name], namespace=args)
-            print(f"Evaluating baseline CCS on {model_name} model and {dataset_name} dataset...")
-            _generate.main(generation_args)
-            _evaluate.main(args, generation_args)
-            print("\n\n")
+    for use_custom_prompt in [False, True]:
+        for model_name in MODEL_TYPE_REGISTRY.keys():
+            for dataset_name in DATASET_LABEL_REGISTRY.keys():
+                setattr(generation_args, 'model_name', model_name)
+                setattr(args, 'model_name', model_name)
+                setattr(generation_args, 'dataset_name', dataset_name)
+                setattr(args, 'dataset_name', dataset_name)
+                setattr(generation_args, 'use_custom_prompt', use_custom_prompt)
+                setattr(args, 'use_custom_prompt', use_custom_prompt)
+                print(f"Evaluating baseline CCS on {model_name} model and {dataset_name} dataset {'with a custom prompt' if use_custom_prompt else ''}...")
+                _generate.main(generation_args)
+                _evaluate.main(args, generation_args)
+                print("\n\n")

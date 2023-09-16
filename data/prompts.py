@@ -1,10 +1,29 @@
 import numpy as np
-import pandas as pd
 import random
 from promptsource.templates import DatasetTemplates
-from copy import deepcopy
 
-from data.registry import DATASET_LABEL_REGISTRY, MODEL_TYPE_REGISTRY
+from data.registry import DATASET_LABEL_REGISTRY, MODEL_TYPE_REGISTRY, get_label_name_for_dataset
+
+class CustomPrompt(DatasetTemplates):
+    def __init__(self, dataset_name, formatted_prompt, format_list):
+        super().__init__(dataset_name)
+        self.dataset_name = dataset_name
+        self.label_name = get_label_name_for_dataset(self.dataset_name)
+        self.formatted_prompt = formatted_prompt
+        self.format_list = format_list
+    
+    def apply(self, example):
+        formatter = []
+        for example_feature in self.format_list:
+            if example_feature in ("neg_label", "pos_label"):
+                write_label = DATASET_LABEL_REGISTRY[self.dataset_name][example[example_feature]]
+                formatter.append(write_label)
+            else:
+                formatter.append(example[example_feature])
+        question = self.formatted_prompt.format(*formatter)
+        answer = DATASET_LABEL_REGISTRY[self.dataset_name][example[self.label_name]]
+        return question, answer
+
 
 def negAndPosLabels(label, dataset_name):
     '''
