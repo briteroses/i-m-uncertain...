@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from sklearn.metrics import roc_curve, auc
 
 class MLPProbe(nn.Module):
     def __init__(self, d):
@@ -142,3 +143,24 @@ class CCS(object):
                 best_loss = loss
 
         return best_loss
+    
+    
+class ROC_CCS(CCS):
+    def get_scores(self, x0_test, x1_test):
+        """
+        Computes prediction scores for the given test inputs
+        """
+        x0 = torch.tensor(self.normalize(x0_test), dtype=torch.float, requires_grad=False, device=self.device)
+        x1 = torch.tensor(self.normalize(x1_test), dtype=torch.float, requires_grad=False, device=self.device)
+        with torch.no_grad():
+            p0, p1 = self.best_probe(x0), self.best_probe(x1)
+        avg_confidence = 0.5 * (p0 + (1-p1))
+        return avg_confidence.detach().cpu().numpy()[:, 0]
+    
+    def compute_roc(self, scores, y_test):
+        """
+        Computes the ROC curve and AUC for the given scores and ground truth labels
+        """
+        fpr, tpr, thresholds = roc_curve(y_test, scores)
+        roc_auc = auc(fpr, tpr)
+        return fpr, tpr, roc_auc
