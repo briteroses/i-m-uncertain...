@@ -46,6 +46,9 @@ def main(args, generation_args):
     scores = ccs.get_scores(neg_hs_test, pos_hs_test)
     fpr, tpr, roc_auc = ccs.compute_roc(scores, y_test)
 
+    if not os.path.exists("ROC_curves"):
+        os.makedirs("ROC_curves")
+    save_path = f"ROC_curves/{args.model_name}_{args.dataset_name}.png"
     plt.figure()
     lw = 2
     plt.plot(fpr, tpr, color='darkorange', lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)
@@ -56,6 +59,7 @@ def main(args, generation_args):
     plt.ylabel('True Positive Rate')
     plt.title('Receiver Operating Characteristic Curve')
     plt.legend(loc="lower right")
+    plt.savefig(save_path)
     plt.show()
 
 
