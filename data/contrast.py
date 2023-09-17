@@ -11,6 +11,8 @@ from datasets import load_dataset
 from data.prompts import CustomPrompt, negAndPosLabels
 from data.registry import DATASET_LABEL_REGISTRY, MODEL_TYPE_REGISTRY, get_label_name_for_dataset, PROMPT_DICT
 
+IDK_DUMMY_LABEL = -1 # hopefully this dummy value is safe...
+IDK_ANSWER_TEXT = ["Uncertain", "I don't know"]
 
 class ContrastDataset(Dataset):
     """
@@ -43,9 +45,6 @@ class ContrastDataset(Dataset):
 
     def __len__(self):
         return len(self.raw_dataset)
-    
-    def change_prompt(self, prompt):
-        self.prompt = prompt
 
     def encode(self, nl_prompt, truncation=True):
         """
@@ -165,7 +164,61 @@ class ContrastDataset(Dataset):
         
         return neg_prompt, pos_prompt
 
-    
+
+class UncertaintyContrastDataset(ContrastDataset):
+    def __init__(self, idk_text_selection=0, *args, **kwargs):
+        # can just use exact same init as contrast dataset
+        super().__init__(*args, **kwargs)
+        assert idk_text_selection < len(IDK_ANSWER_TEXT), "provided index out of range of \'idk\' answer options"
+        self.idk_text_selection = idk_text_selection
+
+    def __getitem__(self, index):
+        neg_prompt, pos_prompt, idk_prompt = self.get_prompts_at_index(index)
+
+        # tokenize
+        neg_ids, pos_ids, idk_ids = self.encode(neg_prompt), self.encode(pos_prompt), self.encode(idk_prompt)
+
+        # verify these are different (e.g. tokenization didn't cut off the difference between them)
+        if self.use_decoder and MODEL_TYPE_REGISTRY[self.model_name] == "encoder_decoder":
+            assert (neg_ids["decoder_input_ids"] - pos_ids["decoder_input_ids"]).sum() != 0, "The decoder_input_ids for the contrast pairs are the same!"
+            assert (pos_ids["decoder_input_ids"] - idk_ids["decoder_input_ids"]).sum() != 0, "The decoder_input_ids for the contrast pairs are the same!"
+            assert (idk_ids["decoder_input_ids"] - neg_ids["decoder_input_ids"]).sum() != 0, "The decoder_input_ids for the contrast pairs are the same!"
+        else:
+            assert (neg_ids["input_ids"] - pos_ids["input_ids"]).sum() != 0, "The input_ids for the contrast pairs are the same!"
+            assert (pos_ids["input_ids"] - idk_ids["input_ids"]).sum() != 0, "The input_ids for the contrast pairs are the same!"
+            assert (idk_ids["input_ids"] - neg_ids["input_ids"]).sum() != 0, "The input_ids for the contrast pairs are the same!"
+
+        label_name = get_label_name_for_dataset(self.dataset_name)
+        ground_truth_label = self.raw_dataset[int(index)][label_name]
+
+        return neg_ids, pos_ids, idk_ids, neg_prompt, pos_prompt, idk_prompt, ground_truth_label
+
+    def get_prompts_at_index(self, index):
+        data = self.raw_dataset[int(index)]
+
+        label_name = get_label_name_for_dataset(self.dataset_name)
+        ground_truth_label = data[label_name]
+
+        neg_label, pos_label = negAndPosLabels(ground_truth_label, self.dataset_name)
+        neg_example, pos_example, idk_example = deepcopy(data), deepcopy(data), deepcopy(data)
+        neg_example[label_name] = neg_label
+        neg_example["neg_label"] = neg_label
+        neg_example["pos_label"] = pos_label
+        pos_example[label_name] = pos_label
+        pos_example["neg_label"] = neg_label
+        pos_example["pos_label"] = pos_label
+        idk_example[label_name] = IDK_DUMMY_LABEL
+        idk_example["neg_label"] = neg_label
+        idk_example["pos_label"] = pos_label
+
+        neg_prompt, pos_prompt = self.prompt.apply(neg_example), self.prompt.apply(pos_example)
+        idk_question, _ = self.prompt.apply(idk_example)
+        idk_answer = IDK_ANSWER_TEXT[self.idk_text_selection]
+        idk_prompt = (idk_question, idk_answer)
+
+        return neg_prompt, pos_prompt, idk_prompt
+
+
 def getLoadName(set_name):
     if set_name in ["imdb", "amazon_polarity", "ag_news", "dbpedia_14", "piqa"]:
         return [set_name]
@@ -193,7 +246,7 @@ def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, use_cust
         raw_dataset = load_dataset(*getLoadName(dataset_name), data_dir="./datasets/rawdata")[split]
 
     # load all the prompts for that dataset
-    if use_custom_prompt and prompt_idx < len(PROMPT_DICT[dataset_name]):
+    if use_custom_prompt and dataset_name in PROMPT_DICT and prompt_idx < len(PROMPT_DICT[dataset_name]):
         formatted_prompt, format_list = PROMPT_DICT[dataset_name][prompt_idx]
         source_prompt = CustomPrompt(dataset_name, formatted_prompt, format_list)
     else:

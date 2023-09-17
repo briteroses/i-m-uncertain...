@@ -8,7 +8,7 @@ DATASET_LABEL_REGISTRY = {
     "boolq": ["false", "true"],
     "qnli": ["yes", "no"],  # represent whether entail
     "piqa": ["solution 1", "solution 2"],
-    "story_cloze": ["choice 1", "choice 2"],
+    # "story_cloze": ["choice 1", "choice 2"],
 }
 
 MODEL_TYPE_REGISTRY = {
@@ -28,6 +28,8 @@ MODEL_TYPE_REGISTRY = {
 
 get_label_name_for_dataset = lambda dataset_name: "label" if dataset_name != "story-cloze" else "answer_right_ending"
 
+use_train_or_test = lambda dataset_name: 'train' if dataset_name in ('copa', 'rte', 'boolq', 'qnli', 'piqa') else 'test'
+
 PROMPT_DICT = {
     "imdb": [
         ["Consider the following example: ''' {} '''\nBetween {} and {}, the sentiment of this example is", [
@@ -42,15 +44,15 @@ PROMPT_DICT = {
             "content", "neg_label", "pos_label"]],
     ],
     "ag_news": [
-        ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, the topic of this example is ", [
+        ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}. Between choice 1 and choice 2, the topic of this example is ", [
             "text", "neg_label", "pos_label"]],
-        ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, what is the topic of this example?", [
+        ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}. Between choice 1 and choice 2, what is the topic of this example?", [
             "text", "neg_label", "pos_label"]],
         ["Consider the following example: ''' {} '''\nWhich is the topic of this example, choice 1: {}, or choice 2: {}?", [
             "text", "neg_label", "pos_label"]],
-        ["{}\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, the topic of this example is ",
+        ["{}\nChoice 1: {}. Choice 2: {}. Between choice 1 and choice 2, the topic of this example is ",
          ["text", "neg_label", "pos_label"]],
-        ["{}\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, what is the topic of this example?",
+        ["{}\nChoice 1: {}. Choice 2: {}. Between choice 1 and choice 2, what is the topic of this example?",
          ["text", "neg_label", "pos_label"]],
         ["{}\nWhich is the topic of this example, choice 1: {}, or choice 2: {}?", ["text", "neg_label", "pos_label"]],
         ["{}\nWhat label best describes this news article, choice 1: {}, or choice 2: {}?", ["text", "neg_label", "pos_label"]],
@@ -58,15 +60,15 @@ PROMPT_DICT = {
             "text", "neg_label", "pos_label"]],
     ],
     "dbpedia_14": [
-        ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, the topic of this example is ", [
+        ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}. Between choice 1 and choice 2, the topic of this example is ", [
             "content", "neg_label", "pos_label"]],
-        ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, what is the topic of this example?", [
+        ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}. Between choice 1 and choice 2, what is the topic of this example?", [
             "content", "neg_label", "pos_label"]],
         ["Consider the following example: ''' {} '''\nWhich is the topic of this example, choice 1: {}, or choice 2: {}?", [
             "content", "neg_label", "pos_label"]],
-        ["{}\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, the topic of this example is ",
+        ["{}\nChoice 1: {}. Choice 2: {}. Between choice 1 and choice 2, the topic of this example is ",
          ["content", "neg_label", "pos_label"]],
-        ["{}\nChoice 1: {}. Choice 2: {}.Between choice 1 and choice 2, what is the topic of this example?",
+        ["{}\nChoice 1: {}. Choice 2: {}. Between choice 1 and choice 2, what is the topic of this example?",
          ["content", "neg_label", "pos_label"]],
         ["{}\nWhich is the topic of this example, choice 1: {}, or choice 2: {}?", ["content", "neg_label", "pos_label"]],
         ["{}\nWhat category does the paragraph belong to, choice 1: {}, or choice 2: {}?",
@@ -89,4 +91,8 @@ PROMPT_DICT = {
         ["{}\nQuestion: Does this imply that \"{}\", yes or no?",
             ["premise", "hypothesis"]],
     ],
+    "piqa": [
+        ["Consider the following task: ''' {} '''\nSolution 1: {}. Solution 2: {}. Between solution 1 and solution 2, which one best solves this task?",
+            ["goal", "sol1", "sol2"]],
+    ]
 }
