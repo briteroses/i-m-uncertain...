@@ -1,24 +1,4 @@
-Evaluating baseline CCS on gpt2 model and imdb dataset ...
-Loading model
-Loading dataloader
-Generating hidden states
-Saving hidden states
-Logistic regression accuracy: 0.51
-CCS accuracy: 0.54
-
-
-
-Evaluating baseline CCS on gpt2 model and amazon_polarity dataset ...
-Loading model
-Loading dataloader
-Generating hidden states
-Saving hidden states
-Logistic regression accuracy: 0.54
-CCS accuracy: 0.525
-
-
-
-Evaluating baseline CCS on gpt2 model and ag_news dataset ...
+Evaluating baseline CCS on gpt2 model and imdb dataset with a custom prompt...
 Loading model
 Loading dataloader
 Generating hidden states

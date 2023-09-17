@@ -1,3 +1,5 @@
+import sys
+
 from sklearn.linear_model import LogisticRegression
 
 from utils.parser import get_parser
