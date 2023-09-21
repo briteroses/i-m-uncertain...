@@ -9,6 +9,7 @@ from probes.CCS import CCS
 from sklearn.metrics import auc
 import matplotlib.pyplot as plt
 import os 
+import numpy as np
 
 def main(args, generation_args):
     # load hidden states and labels
@@ -66,6 +67,15 @@ def main(args, generation_args):
             plt.legend(loc="lower right")
             plt.savefig(save_path)
             plt.show()
+
+    if args.save_confidence_scores:
+        # Save confidence scores and true labels for ROC sliding window sweep
+        save_dir = f"confidence_scores_and_labels/{args.model_name}/{args.dataset_name}"
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        np.save(os.path.join(save_dir, "confidence_scores.npy"), scores)
+        np.save(os.path.join(save_dir, "true_labels.npy"), y_test)
+
 
 
 if __name__ == "__main__":
