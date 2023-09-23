@@ -68,7 +68,9 @@ def get_individual_hidden_states(model, batch_ids, layer=None, all_layers=True, 
     return final_hs
 
 
-def get_all_hidden_states(model, dataloader, layer=None, all_layers=True, token_idx=-1, model_type="encoder_decoder", use_decoder=False):
+def get_all_hidden_states(model, dataloader, layer=None, all_layers=True,
+                            token_idx=-1, model_type="encoder_decoder",
+                            use_decoder=False, use_uncertainty=False):
     """
     Given a model, a tokenizer, and a dataloader, returns the hidden states (corresponding to a given position index) in all layers for all examples in the dataloader,
     along with the average log probs corresponding to the answer tokens
@@ -78,10 +80,15 @@ def get_all_hidden_states(model, dataloader, layer=None, all_layers=True, token_
     """
     all_pos_hs, all_neg_hs = [], []
     all_gt_labels = []
+    if use_uncertainty:
+        all_idk_hs = []
 
     model.eval()
     for batch in tqdm(dataloader):
-        neg_ids, pos_ids, _, _, gt_label = batch
+        if use_uncertainty:
+            neg_ids, pos_ids, idk_ids, _, _, _, gt_label = batch
+        else:
+            neg_ids, pos_ids, _, _, gt_label = batch
 
         neg_hs = get_individual_hidden_states(model, neg_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
                                               model_type=model_type, use_decoder=use_decoder)
@@ -94,9 +101,19 @@ def get_all_hidden_states(model, dataloader, layer=None, all_layers=True, token_
         all_neg_hs.append(neg_hs)
         all_pos_hs.append(pos_hs)
         all_gt_labels.append(gt_label)
+
+        if use_uncertainty:
+            idk_hs = get_individual_hidden_states(model, idk_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
+                                                  model_type=model_type, use_decoder=use_decoder)
+            if dataloader.batch_size == 1:
+                idk_hs = idk_hs.unsqueeze(0)
+            all_idk_hs.append(idk_hs)
     
     all_neg_hs = np.concatenate(all_neg_hs, axis=0)
     all_pos_hs = np.concatenate(all_pos_hs, axis=0)
     all_gt_labels = np.concatenate(all_gt_labels, axis=0)
 
+    if use_uncertainty:
+        all_idk_hs = np.concatenate(all_idk_hs, axis=0)
+        return all_neg_hs, all_pos_hs, all_idk_hs, all_gt_labels
     return all_neg_hs, all_pos_hs, all_gt_labels

@@ -25,5 +25,6 @@ def get_parser():
     parser.add_argument("--token_idx", type=int, default=-1, help="Which token to use (by default the last token)")
     # saving the hidden states
     parser.add_argument("--save_dir", type=str, default="generated_hidden_states", help="Directory to save the hidden states")
-
+    # are we in uncertainty mode?
+    parser.add_argument("--uncertainty", type=bool, default=False, help="Whether to do uncertainty experiments")
     return parser

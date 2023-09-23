@@ -5,11 +5,16 @@ from sklearn.linear_model import LogisticRegression
 from utils.parser import get_parser
 from utils.save_and_load import load_all_generations
 from probes.CCS import CCS
+from probes.uncertainty import UncertaintyDetectingCCS
+
 
 def main(args, generation_args):
     # load hidden states and labels
     generations = load_all_generations(generation_args)
-    neg_hs, pos_hs, y = tuple(generations.values())
+    if args.uncertainty:
+        neg_hs, pos_hs, idk_hs, y = tuple(generations.values())
+    else:
+        neg_hs, pos_hs, y = tuple(generations.values())
 
     # Make sure the shape is correct
     assert neg_hs.shape == pos_hs.shape
@@ -23,23 +28,36 @@ def main(args, generation_args):
     pos_hs_train, pos_hs_test = pos_hs[:len(pos_hs) // 2], pos_hs[len(pos_hs) // 2:]
     y_train, y_test = y[:len(y) // 2], y[len(y) // 2:]
 
+    if args.uncertainty:
+        assert pos_hs.shape == idk_hs.shape
+        idk_hs = idk_hs[..., -1]
+        if idk_hs.shape[1] == 1:
+            idk_hs = idk_hs.squeeze(1)
+        idk_hs_train, idk_hs_test = idk_hs[:len(idk_hs) // 2], idk_hs[len(idk_hs) // 2:]
+
     # Make sure logistic regression accuracy is reasonable; otherwise our method won't have much of a chance of working
     # you can also concatenate, but this works fine and is more comparable to CCS inputs
-    x_train = neg_hs_train - pos_hs_train  
-    x_test = neg_hs_test - pos_hs_test
-    lr = LogisticRegression(class_weight="balanced")
-    lr.fit(x_train, y_train)
-    print("Logistic regression accuracy: {}".format(lr.score(x_test, y_test)))
+    if not args.uncertainty:
+        x_train = neg_hs_train - pos_hs_train
+        x_test = neg_hs_test - pos_hs_test
+        lr = LogisticRegression(class_weight="balanced")
+        lr.fit(x_train, y_train)
+        print("Logistic regression accuracy: {}".format(lr.score(x_test, y_test)))
 
-    # Set up CCS. Note that you can usually just use the default args by simply doing ccs = CCS(neg_hs, pos_hs, y)
-    ccs = CCS(neg_hs_train, pos_hs_train, nepochs=args.nepochs, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
+    if args.uncertainty:
+        uccs = UncertaintyDetectingCCS(neg_hs_train, pos_hs_train, idk_hs_train, nepochs=args.nepochs, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
                     verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
                     var_normalize=args.var_normalize)
-    
-    # train and evaluate CCS
-    ccs.repeated_train()
-    ccs_acc = ccs.get_acc(neg_hs_test, pos_hs_test, y_test)
-    print("CCS accuracy: {}".format(ccs_acc))
+        uccs.repeated_train()
+        uccs_acc, uccs_coverage = uccs.get_acc(neg_hs_test, pos_hs_test, idk_hs_test, y_test)
+        print(f"UCCS accuracy: {uccs_acc} | UCCS coverage: {(100.0*uccs_coverage):1f}%")
+    else:
+        ccs = current_CCS(neg_hs_train, pos_hs_train, nepochs=args.nepochs, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
+                        verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
+                        var_normalize=args.var_normalize)
+        ccs.repeated_train()
+        ccs_acc = ccs.get_acc(neg_hs_test, pos_hs_test, y_test)
+        print("CCS accuracy: {}".format(ccs_acc))
 
 
 if __name__ == "__main__":

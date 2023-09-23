@@ -3,6 +3,7 @@ import argparse
 from utils.parser import get_parser
 from data.registry import DATASET_LABEL_REGISTRY, MODEL_TYPE_REGISTRY, use_train_or_test
 import _evaluate
+import _evaluateROC
 import _generate
 
 if __name__ == '__main__':
@@ -22,8 +23,8 @@ if __name__ == '__main__':
 
     # iterate through all models and datasets via argparse namespace
     for use_custom_prompt in [True]:#[False, True]:
-        for model_name in MODEL_TYPE_REGISTRY.keys():
-            for dataset_name in DATASET_LABEL_REGISTRY.keys():
+        for model_name in ['deberta']:#MODEL_TYPE_REGISTRY.keys():
+            for dataset_name in ['imdb']:#DATASET_LABEL_REGISTRY.keys():
                 setattr(generation_args, 'model_name', model_name)
                 setattr(args, 'model_name', model_name)
                 setattr(generation_args, 'dataset_name', dataset_name)
@@ -35,5 +36,6 @@ if __name__ == '__main__':
                 print(f"Evaluating baseline CCS on {model_name} model and {dataset_name} dataset {'with a custom prompt' if use_custom_prompt else ''}...")
                 _generate.main(generation_args)
                 _evaluate.main(args, generation_args)
+                # _evaluateROC.main(args, generation_args)
                 print("\n\n")
     print(" ~~~~~~~~~~ SUCCESS ~~~~~~~~~~ ")

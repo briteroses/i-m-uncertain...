@@ -5,6 +5,7 @@ import numpy as np
 import torch
 
 from probes.CCS import CCS
+from data.contrast import IDK_DUMMY_LABEL
 
 class UncertaintyDetectingCCS(CCS):
     def __init__(self, x_neg, x_pos, x_idk, nepochs=1000, ntries=10, lr=1e-3, batch_size=-1, 
@@ -58,7 +59,7 @@ class UncertaintyDetectingCCS(CCS):
             p_neg, p_pos, p_idk = self.best_probe(x_neg), self.best_probe(x_pos), self.best_probe(x_idk)
         # maximize over all permutations of three p's -> three labels
         acc, coverage = -np.inf, 1
-        for perm in permutations([0, 1, 2]):
+        for perm in permutations([0, 1, IDK_DUMMY_LABEL]):
             p_to_label_neg, p_to_label_pos, p_to_label_idk = perm
             predictions = np.where(p_pos > p_neg, p_to_label_pos, p_to_label_neg)
             predictions = np.where(p_idk > p_pos, p_to_label_idk, predictions)
