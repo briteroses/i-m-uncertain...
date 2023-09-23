@@ -19,6 +19,8 @@ if __name__ == '__main__':
     parser.add_argument("--linear", action="store_true")
     parser.add_argument("--weight_decay", type=float, default=0.01)
     parser.add_argument("--var_normalize", action="store_true")
+    parser.add_argument("--roc", action="store_true", help="Generate ROC curve", default=True)
+    parser.add_argument("--save_confidence_scores", action="store_true", help="Save confidence scores and true labels for ROC curve experiments", default=True)
     args = parser.parse_args()
 
     # iterate through all models and datasets via argparse namespace

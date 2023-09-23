@@ -8,6 +8,11 @@ from probes.CCS import CCS
 from probes.uncertainty import UncertaintyDetectingCCS
 
 
+from sklearn.metrics import auc
+import matplotlib.pyplot as plt
+import os 
+import numpy as np
+
 def main(args, generation_args):
     # load hidden states and labels
     generations = load_all_generations(generation_args)
@@ -58,6 +63,37 @@ def main(args, generation_args):
         ccs.repeated_train()
         ccs_acc = ccs.get_acc(neg_hs_test, pos_hs_test, y_test)
         print("CCS accuracy: {}".format(ccs_acc))
+
+    if args.roc:
+        scores = ccs.get_scores(neg_hs_test, pos_hs_test)
+        fpr, tpr, roc_auc = ccs.compute_roc(scores, y_test)
+
+        if fpr is not None and tpr is not None and roc_auc is not None:  # If it's not binary, we can't compute the ROC curve
+            if not os.path.exists("ROC_curves"):
+                os.makedirs("ROC_curves")
+                
+            save_path = f"ROC_curves/{args.model_name}_{args.dataset_name}.png"
+            plt.figure()
+            lw = 2
+            plt.plot(fpr, tpr, color='darkorange', lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)
+            plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+            plt.xlim([0.0, 1.0])
+            plt.ylim([0.0, 1.05])
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title('Receiver Operating Characteristic Curve')
+            plt.legend(loc="lower right")
+            plt.savefig(save_path)
+            plt.show()
+
+    if args.save_confidence_scores:
+        # Save confidence scores and true labels for ROC sliding window sweep
+        save_dir = f"confidence_scores_and_labels/{args.model_name}/{args.dataset_name}"
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        np.save(os.path.join(save_dir, "confidence_scores.npy"), scores)
+        np.save(os.path.join(save_dir, "true_labels.npy"), y_test)
+
 
 
 if __name__ == "__main__":

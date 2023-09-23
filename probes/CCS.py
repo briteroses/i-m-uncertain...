@@ -144,8 +144,6 @@ class CCS(object):
 
         return best_loss
     
-    
-class ROC_CCS(CCS):
     def get_scores(self, x0_test, x1_test):
         """
         Computes prediction scores for the given test inputs
@@ -161,6 +159,11 @@ class ROC_CCS(CCS):
         """
         Computes the ROC curve and AUC for the given scores and ground truth labels
         """
-        fpr, tpr, thresholds = roc_curve(y_test, scores)
-        roc_auc = auc(fpr, tpr)
-        return fpr, tpr, roc_auc
+        unique_labels = np.unique(y_test)
+        if len(unique_labels) > 2:
+            print("Warning: Multiclass format is not supported for ROC curve. Skipping computation.")
+            return None, None, None
+        else:
+            fpr, tpr, thresholds = roc_curve(y_test, scores)
+            roc_auc = auc(fpr, tpr)
+            return fpr, tpr, roc_auc
