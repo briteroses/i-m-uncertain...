@@ -1,12 +1,16 @@
+import os
+
 import matplotlib.pyplot as plt
 from sklearn.metrics import auc
-
-
 from sklearn.linear_model import LogisticRegression
 
 from utils.parser import get_parser
 from utils.save_and_load import load_all_generations
 from probes.CCS import ROC_CCS as CCS
+
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[0]
 
 def main(args, generation_args):
     # load hidden states and labels
@@ -46,9 +50,10 @@ def main(args, generation_args):
     scores = ccs.get_scores(neg_hs_test, pos_hs_test)
     fpr, tpr, roc_auc = ccs.compute_roc(scores, y_test)
 
-    if not os.path.exists("ROC_curves"):
-        os.makedirs("ROC_curves")
-    save_path = f"ROC_curves/{args.model_name}_{args.dataset_name}.png"
+    plot_dir = str(ROOT_DIR / "plots/ROC")
+    if not os.path.exists(plot_dir):
+        os.makedirs(plot_dir)
+    save_path = f"{plot_dir}/{args.model_name}_{args.dataset_name}.png"
     plt.figure()
     lw = 2
     plt.plot(fpr, tpr, color='darkorange', lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)

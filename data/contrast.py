@@ -166,9 +166,10 @@ class ContrastDataset(Dataset):
 
 
 class UncertaintyContrastDataset(ContrastDataset):
-    def __init__(self, idk_text_selection=0, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         # can just use exact same init as contrast dataset
         super().__init__(*args, **kwargs)
+        idk_text_selection = 0
         assert idk_text_selection < len(IDK_ANSWER_TEXT), "provided index out of range of \'idk\' answer options"
         self.idk_text_selection = idk_text_selection
 
@@ -233,7 +234,8 @@ def getLoadName(set_name):
 def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, use_custom_prompt=False,
                             batch_size=16, num_examples=1000,
                             model_name="deberta", use_decoder=False,
-                            device="cuda", pin_memory=True, num_workers=1):
+                            device="cuda", pin_memory=True, num_workers=1,
+                            use_uncertainty=False):
     """
     Creates a dataloader for a given dataset (and its split), tokenizer, and prompt index
 
@@ -258,7 +260,8 @@ def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, use_cust
         source_prompt = all_prompts[prompt_name_list[prompt_idx]]
 
     # create the ConstrastDataset
-    contrast_dataset = ContrastDataset(raw_dataset, tokenizer, source_prompt, 
+    dataset_object = UncertaintyContrastDataset if use_uncertainty else ContrastDataset
+    contrast_dataset = dataset_object(raw_dataset, tokenizer, source_prompt, 
                                        model_name=model_name, dataset_name=dataset_name, use_decoder=use_decoder, 
                                        device=device)
 
@@ -268,7 +271,10 @@ def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, use_cust
     random_idxs = np.random.permutation(len(contrast_dataset))
     keep_idxs = []
     for idx in random_idxs:
-        neg_prompt, pos_prompt = contrast_dataset.get_prompts_at_index(int(idx))
+        if use_uncertainty:
+            neg_prompt, pos_prompt, _ = contrast_dataset.get_prompts_at_index(int(idx))
+        else:
+            neg_prompt, pos_prompt = contrast_dataset.get_prompts_at_index(int(idx))
         neg_text = neg_prompt[0] + " " + neg_prompt[1]
         pos_text = pos_prompt[0] + " " + pos_prompt[1]
         if len(tokenizer.encode(neg_text, truncation=False)) < tokenizer.model_max_length - 12 \

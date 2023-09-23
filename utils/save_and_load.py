@@ -4,9 +4,9 @@ import numpy as np
 GENERATION_TYPES = [
     "negative_hidden_states",
     "positive_hidden_states",
-    # "idk_hidden_states",
     "labels"
 ]
+GENERATION_TYPES_PLUS_IDK = GENERATION_TYPES + ["idk_hidden_states",]
 
 
 def save_generations(generation, args, generation_type):
@@ -18,7 +18,6 @@ def save_generations(generation, args, generation_type):
 
     Saves the generations to an appropriate directory.
     """
-    assert generation_type in GENERATION_TYPES, "invalid generation_type"
     # construct the filename based on the args
     arg_dict = vars(args)
     exclude_keys = ["save_dir", "cache_dir", "device"]
@@ -34,7 +33,6 @@ def save_generations(generation, args, generation_type):
 
 def load_single_generation(args, generation_type="labels"):
     # use the same filename as in save_generations
-    assert generation_type in GENERATION_TYPES, "invalid generation_type"
     arg_dict = vars(args)
     exclude_keys = ["save_dir", "cache_dir", "device"]
     filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in exclude_keys]) + ".npy".format(generation_type)
@@ -44,9 +42,11 @@ def load_single_generation(args, generation_type="labels"):
 def load_all_generations(args):
     # load all the saved generations: neg_hs, pos_hs, and labels
     generations = []
-    for generation_type in GENERATION_TYPES:
+    for generation_type in (GENERATION_TYPES_PLUS_IDK if args.uncertainty else GENERATION_TYPES):
         generations.append(load_single_generation(args, generation_type=generation_type))
 
-    # generations_dict = dict(zip(['neg_hs', 'pos_hs', 'idk_hs', 'labels'], generations))
-    generations_dict = dict(zip(['neg_hs', 'pos_hs', 'labels'], generations))
+    zip_labels = ['neg_hs', 'pos_hs', 'labels']
+    if args.uncertainty:
+        zip_labels += ['idk_hs']
+    generations_dict = dict(zip(zip_labels, generations))
     return generations_dict
