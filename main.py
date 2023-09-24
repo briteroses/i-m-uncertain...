@@ -3,13 +3,15 @@ import argparse
 from utils.parser import get_parser
 from data.registry import DATASET_LABEL_REGISTRY, MODEL_TYPE_REGISTRY, use_train_or_test
 import _evaluate
-import _evaluateROC
 import _generate
 
 if __name__ == '__main__':
-    # set up base args
-    parser = get_parser()
-    generation_args = parser.parse_args()
+    # set up base args for generation
+    generation_parser = get_parser()
+    generation_args = generation_parser.parse_args()
+
+    # set up parser for the rest of the args
+    parser = argparse.ArgumentParser()
     parser.add_argument("--nepochs", type=int, default=1000)
     parser.add_argument("--ntries", type=int, default=10)
     parser.add_argument("--lr", type=float, default=1e-3)
@@ -21,12 +23,13 @@ if __name__ == '__main__':
     parser.add_argument("--var_normalize", action="store_true")
     parser.add_argument("--roc", action="store_true", help="Generate ROC curve", default=True)
     parser.add_argument("--save_confidence_scores", action="store_true", help="Save confidence scores and true labels for ROC curve experiments", default=True)
+    parser.add_argument("--uncertainty", action="store_true", help="Run with uncertainty set to True", default=True)
     args = parser.parse_args()
 
     # iterate through all models and datasets via argparse namespace
     for use_custom_prompt in [True]:#[False, True]:
-        for model_name in ['deberta']:#MODEL_TYPE_REGISTRY.keys():
-            for dataset_name in ['imdb']:#DATASET_LABEL_REGISTRY.keys():
+        for model_name in MODEL_TYPE_REGISTRY.keys():
+            for dataset_name in DATASET_LABEL_REGISTRY.keys():
                 setattr(generation_args, 'model_name', model_name)
                 setattr(args, 'model_name', model_name)
                 setattr(generation_args, 'dataset_name', dataset_name)
@@ -35,9 +38,11 @@ if __name__ == '__main__':
                 setattr(args, 'use_custom_prompt', use_custom_prompt)
                 setattr(generation_args, 'split', use_train_or_test(dataset_name))
                 setattr(args, 'split', use_train_or_test(dataset_name))
-                print(f"Evaluating baseline CCS on {model_name} model and {dataset_name} dataset {'with a custom prompt' if use_custom_prompt else ''}...")
+                if args.uncertainty:
+                    print(f"Evaluating Uncertainty CCS on {model_name} model and {dataset_name} dataset {'with a custom prompt' if use_custom_prompt else ''}...")
+                else:
+                    print(f"Evaluating baseline CCS on {model_name} model and {dataset_name} dataset {'with a custom prompt' if use_custom_prompt else ''}...")
                 _generate.main(generation_args)
                 _evaluate.main(args, generation_args)
-                # _evaluateROC.main(args, generation_args)
                 print("\n\n")
     print(" ~~~~~~~~~~ SUCCESS ~~~~~~~~~~ ")

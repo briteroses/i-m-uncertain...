@@ -57,7 +57,7 @@ def main(args, generation_args):
         uccs_acc, uccs_coverage = uccs.get_acc(neg_hs_test, pos_hs_test, idk_hs_test, y_test)
         print(f"UCCS accuracy: {uccs_acc} | UCCS coverage: {(100.0*uccs_coverage):1f}%")
     else:
-        ccs = current_CCS(neg_hs_train, pos_hs_train, nepochs=args.nepochs, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
+        ccs = CCS(neg_hs_train, pos_hs_train, nepochs=args.nepochs, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
                         verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
                         var_normalize=args.var_normalize)
         ccs.repeated_train()
@@ -69,10 +69,17 @@ def main(args, generation_args):
         fpr, tpr, roc_auc = ccs.compute_roc(scores, y_test)
 
         if fpr is not None and tpr is not None and roc_auc is not None:  # If it's not binary, we can't compute the ROC curve
-            if not os.path.exists("ROC_curves"):
-                os.makedirs("ROC_curves")
+            if args.uncertainty:
+                if not os.path.exists("Uncertainty_ROC_curves"):
+                    os.makedirs("Uncertainty_ROC_curves")
+            else:
+                if not os.path.exists("ROC_curves"):
+                    os.makedirs("ROC_curves")
                 
             save_path = f"ROC_curves/{args.model_name}_{args.dataset_name}.png"
+            if args.uncertainty:
+                save_path = "Uncertainty_" + save_path
+            
             plt.figure()
             lw = 2
             plt.plot(fpr, tpr, color='darkorange', lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)
@@ -89,6 +96,8 @@ def main(args, generation_args):
     if args.save_confidence_scores:
         # Save confidence scores and true labels for ROC sliding window sweep
         save_dir = f"confidence_scores_and_labels/{args.model_name}/{args.dataset_name}"
+        if args.uncertainty:
+            args.save_dir = "Uncertainty_" + args.save_dir
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
         np.save(os.path.join(save_dir, "confidence_scores.npy"), scores)
