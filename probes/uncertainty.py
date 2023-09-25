@@ -44,9 +44,7 @@ class UncertaintyDetectingCCS(CCS):
         """
         Returns the CCS loss for two probabilities each of shape (n,1) or (n,)
         """
-        #L_confidence = (torch.min(p_neg, p_pos, p_idk)**2).mean(0)
         L_confidence = (torch.min(torch.min(p_neg, p_pos), p_idk)**2).mean(0)
-
         L_consistency = ((p_neg + p_pos + p_idk - 1)**2).mean(0)
         return L_confidence + L_consistency
 
@@ -57,28 +55,25 @@ class UncertaintyDetectingCCS(CCS):
         x_neg = torch.tensor(self.normalize(x_neg_test), dtype=torch.float, requires_grad=False, device=self.device)
         x_pos = torch.tensor(self.normalize(x_pos_test), dtype=torch.float, requires_grad=False, device=self.device)
         x_idk = torch.tensor(self.normalize(x_idk_test), dtype=torch.float, requires_grad=False, device=self.device)
+        y_test = torch.tensor(y_test, device=self.device)
         with torch.no_grad():
             p_neg, p_pos, p_idk = self.best_probe(x_neg), self.best_probe(x_pos), self.best_probe(x_idk)
         # maximize over all permutations of three p's -> three labels
         acc, coverage = -np.inf, 1
         for perm in permutations([0, 1, IDK_DUMMY_LABEL]):
             p_to_label_neg, p_to_label_pos, p_to_label_idk = perm
-            #predictions = np.where(p_pos > p_neg, p_to_label_pos, p_to_label_neg)
-            p_pos_cpu = p_pos.cpu().numpy()
-            p_neg_cpu = p_neg.cpu().numpy()
-            predictions = np.where(p_pos_cpu > p_neg_cpu, p_to_label_pos, p_to_label_neg)
-
-            #predictions = np.where(p_pos.cpu() > p_neg.cpu(), p_to_label_pos, p_to_label_neg)
-            predictions = np.where(p_idk > p_pos, p_to_label_idk, predictions)
-            predictions = predictions.astype(int)[:, 0]
+            predictions = torch.where(p_pos > p_neg, p_to_label_pos, p_to_label_neg)
+            predictions = torch.where(p_idk > p_pos, p_to_label_idk, predictions)
+            predictions = predictions.int()[:, 0]
+            
             if includes_uncertainty:
-                perm_acc = (predictions == y_test).mean()
+                perm_acc = (predictions == y_test).float().mean()
                 if acc > perm_acc:
                     acc = perm_acc
             else:
                 covered = (predictions == 0) | (predictions == 1)
-                perm_acc = (predictions[covered] == y_test[covered]).mean()
-                if acc > perm_acc:
+                perm_acc = (predictions[covered] == y_test[covered]).float().mean()
+                if acc < perm_acc:
                     acc = perm_acc
                     coverage = covered / len(y_test)
 

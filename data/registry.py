@@ -17,10 +17,10 @@ MODEL_TYPE_REGISTRY = {
     "gpt2-large": "decoder",
     "gpt2-xl": "decoder",
     "gpt-neo": "decoder",
-    # "gpt-j": "decoder",
+    "gpt-j": "decoder",
     "T0pp": "encoder_decoder",
-    # "unifiedqa": "encoder_decoder",
-    # "T5": "encoder_decoder",
+    "unifiedqa": "encoder_decoder",
+    "T5": "encoder_decoder",
     "deberta-mnli": "encoder",
     "deberta": "encoder",
     "roberta-mnli": "encoder",
@@ -36,12 +36,16 @@ PROMPT_DICT = {
             "text", "neg_label", "pos_label"]],
         ["Consider the following example: ''' {} '''\nBetween {} and {}, which is the sentiment of this example?", [
             "text", "neg_label", "pos_label"]],
+        ["Consider the following example: ''' {} '''\nBetween {} and {}, is {} the sentiment of this example?", [
+            "text", "neg_label", "pos_label", "pos_label"]],
     ],
     "amazon_polarity": [
         ["Consider the following example: ''' {} '''\nBetween {} and {}, the sentiment of this example is", [
             "content", "neg_label", "pos_label"]],
         ["Consider the following example: ''' {} '''\nBetween {} and {}, which is the sentiment of this example?", [
             "content", "neg_label", "pos_label"]],
+        ["Consider the following example: ''' {} '''\nBetween {} and {}, is {} the sentiment of this example?", [
+            "text", "neg_label", "pos_label", "pos_label"]],
     ],
     "ag_news": [
         ["Consider the following example: ''' {} '''\nChoice 1: {}. Choice 2: {}. Between choice 1 and choice 2, the topic of this example is ", [
