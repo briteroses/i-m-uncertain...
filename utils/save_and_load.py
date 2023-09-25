@@ -23,8 +23,8 @@ def save_generations(generation, args, generation_type, use_uncertainty):
     """
     save_dir = args.save_dir
     # Check for uncertainty flag and modify save directory
-    if use_uncertainty:
-        save_dir = "Uncertainty_" + save_dir
+    # if use_uncertainty:
+    #     save_dir = "Uncertainty_" + save_dir
     # construct the filename based on the args
     arg_dict = vars(args)
     filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in EXCLUDE_KEYS]) + ".npy".format(generation_type)
@@ -40,8 +40,8 @@ def save_generations(generation, args, generation_type, use_uncertainty):
 def load_single_generation(args, generation_type="labels", use_uncertainty=False):
     save_dir = args.save_dir
     # Check for uncertainty flag and modify load directory
-    if use_uncertainty:
-        save_dir = "Uncertainty_" + save_dir
+    # if use_uncertainty:
+    #     save_dir = "Uncertainty_" + save_dir
     # use the same filename as in save_generations
     arg_dict = vars(args)
     EXCLUDE_KEYS = ["save_dir", "cache_dir", "device"]

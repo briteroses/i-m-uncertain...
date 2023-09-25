@@ -15,7 +15,20 @@ import numpy as np
 
 import json
 
+SAVE_PREFIX = ""
+# SAVE_PREFIX = "/content/uncertainty/"
+
 def main(args, generation_args):
+    if args.uncertainty:
+        save_path = SAVE_PREFIX + "results/ccs.json"
+        with open(save_path, "w+") as fin:
+            try:
+                ccs_json =  json.load(fin)
+            except json.JSONDecodeError:
+                ccs_json = {}
+        if args.model_name in ccs_json and args.dataset_name in ccs_json[args.model_name]:
+            print(f"CCS and UCCS results for {args.model_name} and {args.dataset_name} already generated, skipping this...")
+
     # load hidden states and labels
     generations = load_all_generations(generation_args)
     if args.uncertainty:
@@ -78,7 +91,7 @@ def main(args, generation_args):
         uccs_acc, uccs_coverage = uccs.get_acc(neg_hs_test, pos_hs_test, idk_hs_test, y_test)
         print(f"UCCS accuracy: {uccs_acc:4f} | UCCS coverage: {(100.0*uccs_coverage):1f}%")
         
-        save_path = "results/ccs.json"
+        save_path = SAVE_PREFIX + "results/ccs.json"
         with open(save_path, "w+") as fin:
             try:
                 ccs_json =  json.load(fin)
@@ -101,7 +114,7 @@ def main(args, generation_args):
                 if not os.path.exists("results/ROC_curves"):
                     os.makedirs("results/ROC_curves")
                 
-            save_path = f"results/ROC_curves/{args.model_name}_{args.dataset_name}.png"
+            save_path = SAVE_PREFIX + f"results/ROC_curves/{args.model_name}_{args.dataset_name}.png"
             # if args.uncertainty:
             #     save_path = "Uncertainty_" + save_path
             
@@ -120,7 +133,7 @@ def main(args, generation_args):
 
     if args.save_confidence_scores:
         # Save confidence scores and true labels for ROC sliding window sweep
-        save_dir = f"results/confidence_scores_and_labels/{args.model_name}/{args.dataset_name}"
+        save_dir = SAVE_PREFIX + f"results/confidence_scores_and_labels/{args.model_name}/{args.dataset_name}"
         # if args.uncertainty:
         #     args.save_dir = "Uncertainty_" + args.save_dir
         if not os.path.exists(save_dir):
