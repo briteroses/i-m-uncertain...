@@ -32,11 +32,18 @@ def get_individual_hidden_states(model, batch_ids, layer=None, all_layers=True, 
     """
     if use_decoder:
         assert "decoder" in model_type
-        
+
     # forward pass
     with torch.no_grad():
         batch_ids = batch_ids.to(model.device)
+        #print(f"Input batch_ids shape: {batch_ids['input_ids'].shape}")
         output = model(**batch_ids, output_hidden_states=True)
+
+    # Debugging: Print keys and shapes from the model's output
+    # print("Keys in output:", output.keys())
+    # for key, value in output.items():
+    #     if isinstance(value, torch.Tensor):
+    #         print(f"Shape of {key}: {value.shape}")
 
     # get all the corresponding hidden states (which is a tuple of length num_layers)
     if use_decoder and "decoder_hidden_states" in output.keys():
@@ -45,6 +52,9 @@ def get_individual_hidden_states(model, batch_ids, layer=None, all_layers=True, 
         hs_tuple = output["encoder_hidden_states"]
     else:
         hs_tuple = output["hidden_states"]
+
+    # Debugging: Print the shape of the hidden states
+    #print(f"Hidden state shape for batch_ids: {hs_tuple[0].shape}")  
 
     # just get the corresponding layer hidden states
     if all_layers:
@@ -64,7 +74,7 @@ def get_individual_hidden_states(model, batch_ids, layer=None, all_layers=True, 
         mask = batch_ids["decoder_attention_mask"] if (model_type == "encoder_decoder" and use_decoder) else batch_ids["attention_mask"]
         first_mask_loc = get_first_mask_loc(mask).squeeze().cpu()
         final_hs = hs[torch.arange(hs.size(0)), first_mask_loc+token_idx]  # (bs, dim, num_layers)
-    
+
     return final_hs
 
 
@@ -98,15 +108,28 @@ def get_all_hidden_states(model, dataloader, layer=None, all_layers=True,
         if dataloader.batch_size == 1:
             neg_hs, pos_hs = neg_hs.unsqueeze(0), pos_hs.unsqueeze(0)
 
+        # print(f'Batch neg_hs shape: {neg_hs.shape}')
+        # print(f'Batch pos_hs shape: {pos_hs.shape}')
+
+        #print(f'Before appending, all_neg_hs shape: {np.asarray(all_neg_hs).shape if all_neg_hs else None}')
         all_neg_hs.append(neg_hs)
+        #print(f"After appending, individual neg_hs shape: {neg_hs.shape}, accumulated all_neg_hs shape: {np.asarray(all_neg_hs).shape}")
+
+        # print(f'After appending, all_neg_hs shape: {np.asarray(all_neg_hs).shape}')
+        # print(f'Before appending, all_pos_hs shape: {np.asarray(all_pos_hs).shape if all_pos_hs else None}')
         all_pos_hs.append(pos_hs)
+        # print(f"After appending, individual pos_hs shape: {pos_hs.shape}, accumulated all_pos_hs shape: {np.asarray(all_pos_hs).shape}")
+        # print(f'After appending, all_pos_hs shape: {np.asarray(all_pos_hs).shape}')
+
         all_gt_labels.append(gt_label)
 
         if use_uncertainty:
             idk_hs = get_individual_hidden_states(model, idk_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
                                                   model_type=model_type, use_decoder=use_decoder)
+            #print(f'Batch idk_hs shape: {idk_hs.shape}')
             if dataloader.batch_size == 1:
                 idk_hs = idk_hs.unsqueeze(0)
+                #print(f'Batch idk_hs shape after unsqueezing: {idk_hs.shape}')
             all_idk_hs.append(idk_hs)
     
     all_neg_hs = np.concatenate(all_neg_hs, axis=0)
@@ -115,5 +138,8 @@ def get_all_hidden_states(model, dataloader, layer=None, all_layers=True,
 
     if use_uncertainty:
         all_idk_hs = np.concatenate(all_idk_hs, axis=0)
+        # print(f'Concatenated all_neg_hs shape: {all_neg_hs.shape}')
+        # print(f'Concatenated all_pos_hs shape: {all_pos_hs.shape}')
+        # print(f'Concatenated all_idk_hs shape: {all_idk_hs.shape}')
         return all_neg_hs, all_pos_hs, all_idk_hs, all_gt_labels
     return all_neg_hs, all_pos_hs, all_gt_labels

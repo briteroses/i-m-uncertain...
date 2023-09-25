@@ -44,7 +44,9 @@ class UncertaintyDetectingCCS(CCS):
         """
         Returns the CCS loss for two probabilities each of shape (n,1) or (n,)
         """
-        L_confidence = (torch.min(p_neg, p_pos, p_idk)**2).mean(0)
+        #L_confidence = (torch.min(p_neg, p_pos, p_idk)**2).mean(0)
+        L_confidence = (torch.min(torch.min(p_neg, p_pos), p_idk)**2).mean(0)
+
         L_consistency = ((p_neg + p_pos + p_idk - 1)**2).mean(0)
         return L_confidence + L_consistency
 
@@ -61,7 +63,12 @@ class UncertaintyDetectingCCS(CCS):
         acc, coverage = -np.inf, 1
         for perm in permutations([0, 1, IDK_DUMMY_LABEL]):
             p_to_label_neg, p_to_label_pos, p_to_label_idk = perm
-            predictions = np.where(p_pos > p_neg, p_to_label_pos, p_to_label_neg)
+            #predictions = np.where(p_pos > p_neg, p_to_label_pos, p_to_label_neg)
+            p_pos_cpu = p_pos.cpu().numpy()
+            p_neg_cpu = p_neg.cpu().numpy()
+            predictions = np.where(p_pos_cpu > p_neg_cpu, p_to_label_pos, p_to_label_neg)
+
+            #predictions = np.where(p_pos.cpu() > p_neg.cpu(), p_to_label_pos, p_to_label_neg)
             predictions = np.where(p_idk > p_pos, p_to_label_idk, predictions)
             predictions = predictions.astype(int)[:, 0]
             if includes_uncertainty:

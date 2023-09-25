@@ -17,10 +17,19 @@ def main(args, generation_args):
     # load hidden states and labels
     generations = load_all_generations(generation_args)
     if args.uncertainty:
-        neg_hs, pos_hs, idk_hs, y = tuple(generations.values())
+        #neg_hs, pos_hs, idk_hs, y = tuple(generations.values())
+        neg_hs = generations['neg_hs']
+        pos_hs = generations['pos_hs']
+        idk_hs = generations['idk_hs']
+        y = generations['labels']
+
+        # print(f'idk_hs shape right after loading: {idk_hs.shape}')
+        # print(f'pos_hs shape right after loading: {pos_hs.shape}')
+
     else:
         neg_hs, pos_hs, y = tuple(generations.values())
 
+    temp_hs_shape = neg_hs.shape
     # Make sure the shape is correct
     assert neg_hs.shape == pos_hs.shape
     neg_hs, pos_hs = neg_hs[..., -1], pos_hs[..., -1]  # take the last layer
@@ -34,10 +43,14 @@ def main(args, generation_args):
     y_train, y_test = y[:len(y) // 2], y[len(y) // 2:]
 
     if args.uncertainty:
-        assert pos_hs.shape == idk_hs.shape
+        # print(f'pos_hs shape: {pos_hs.shape}')
+        # print(f'idk_hs shape: {idk_hs.shape}')
+        assert temp_hs_shape == idk_hs.shape
         idk_hs = idk_hs[..., -1]
+        #print(f'idk_hs shape after taking last layer: {idk_hs.shape}')
         if idk_hs.shape[1] == 1:
             idk_hs = idk_hs.squeeze(1)
+            #print(f'idk_hs shape after squeezing extra dimension: {idk_hs.shape}')
         idk_hs_train, idk_hs_test = idk_hs[:len(idk_hs) // 2], idk_hs[len(idk_hs) // 2:]
 
     # Make sure logistic regression accuracy is reasonable; otherwise our method won't have much of a chance of working
