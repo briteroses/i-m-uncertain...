@@ -79,7 +79,7 @@ def main(args, generation_args):
         print(f"UCCS accuracy: {uccs_acc:4f} | UCCS coverage: {(100.0*uccs_coverage):1f}%")
         
         save_path = "results/ccs.json"
-        with open("file.json", "w+") as fin:
+        with open(save_path, "w+") as fin:
             try:
                 ccs_json =  json.load(fin)
             except json.JSONDecodeError:
