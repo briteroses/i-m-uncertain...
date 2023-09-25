@@ -18,14 +18,15 @@ if __name__ == '__main__':
     parser.add_argument("--linear", action="store_true")
     parser.add_argument("--weight_decay", type=float, default=0.01)
     parser.add_argument("--var_normalize", action="store_true")
-    parser.add_argument("--roc", action="store_true", help="Generate ROC curve", default=True)
-    parser.add_argument("--save_confidence_scores", action="store_true", help="Save confidence scores and true labels for ROC curve experiments", default=True)
+    parser.add_argument("--roc", action="store_true", help="Generate ROC curve", default=False)
+    parser.add_argument("--save_confidence_scores", action="store_true", help="Save confidence scores and true labels for ROC curve experiments", default=False)
     #parser.add_argument("--uncertainty", action="store_true", help="Run with uncertainty set to True", default=True)
     args = parser.parse_args()
+    assert not (args.uncertainty and args.roc), "cannot run uncertainty and roc experiments at the same time"
 
     # iterate through all models and datasets via argparse namespace
     for use_custom_prompt in [True]:#[False, True]:
-        for model_name in MODEL_TYPE_REGISTRY.keys():
+        for model_name in ['deberta', 'gpt-j', 'gpt2-large', 'T0pp', 'unifiedqa']: #MODEL_TYPE_REGISTRY.keys():
             for dataset_name in DATASET_LABEL_REGISTRY.keys():
                 setattr(generation_args, 'model_name', model_name)
                 setattr(args, 'model_name', model_name)

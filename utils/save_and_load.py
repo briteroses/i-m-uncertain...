@@ -8,6 +8,9 @@ GENERATION_TYPES = [
 ]
 GENERATION_TYPES_PLUS_IDK = GENERATION_TYPES + ["idk_hidden_states",]
 
+EXCLUDE_KEYS = ["save_dir", "cache_dir", "device", "parallelize",
+                "split", "prompt_idx", "batch_size", "num_examples",
+                "use_decoder", "layer", "all_layers", "token_idx"]
 
 def save_generations(generation, args, generation_type, use_uncertainty):
     """
@@ -24,8 +27,7 @@ def save_generations(generation, args, generation_type, use_uncertainty):
         save_dir = "Uncertainty_" + save_dir
     # construct the filename based on the args
     arg_dict = vars(args)
-    exclude_keys = ["save_dir", "cache_dir", "device"]
-    filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in exclude_keys]) + ".npy".format(generation_type)
+    filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in EXCLUDE_KEYS]) + ".npy".format(generation_type)
 
     # create save directory if it doesn't exist
     if not os.path.exists(save_dir):
@@ -42,8 +44,8 @@ def load_single_generation(args, generation_type="labels", use_uncertainty=False
         save_dir = "Uncertainty_" + save_dir
     # use the same filename as in save_generations
     arg_dict = vars(args)
-    exclude_keys = ["save_dir", "cache_dir", "device"]
-    filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in exclude_keys]) + ".npy".format(generation_type)
+    EXCLUDE_KEYS = ["save_dir", "cache_dir", "device"]
+    filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in EXCLUDE_KEYS]) + ".npy".format(generation_type)
     
     # loaded_data = np.load(os.path.join(save_dir, filename))
     # if generation_type == "idk_hidden_states":

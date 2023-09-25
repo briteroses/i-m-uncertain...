@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import os 
 import numpy as np
 
+import json
+
 def main(args, generation_args):
     # load hidden states and labels
     generations = load_all_generations(generation_args)
@@ -62,20 +64,30 @@ def main(args, generation_args):
         lr.fit(x_train, y_train)
         print("Logistic regression accuracy: {}".format(lr.score(x_test, y_test)))
 
+    ccs = CCS(neg_hs_train, pos_hs_train, nepochs=args.nepochs, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
+                verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
+                var_normalize=args.var_normalize)
+    ccs.repeated_train()
+    ccs_acc = ccs.get_acc(neg_hs_test, pos_hs_test, y_test)
+    print("CCS accuracy: {}".format(ccs_acc))
     if args.uncertainty:
         uccs = UncertaintyDetectingCCS(neg_hs_train, pos_hs_train, idk_hs_train, nepochs=args.nepochs, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
                     verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
                     var_normalize=args.var_normalize)
         uccs.repeated_train()
         uccs_acc, uccs_coverage = uccs.get_acc(neg_hs_test, pos_hs_test, idk_hs_test, y_test)
-        print(f"UCCS accuracy: {uccs_acc} | UCCS coverage: {(100.0*uccs_coverage):1f}%")
-    else:
-        ccs = CCS(neg_hs_train, pos_hs_train, nepochs=args.nepochs, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
-                        verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
-                        var_normalize=args.var_normalize)
-        ccs.repeated_train()
-        ccs_acc = ccs.get_acc(neg_hs_test, pos_hs_test, y_test)
-        print("CCS accuracy: {}".format(ccs_acc))
+        print(f"UCCS accuracy: {uccs_acc:4f} | UCCS coverage: {(100.0*uccs_coverage):1f}%")
+        
+        save_path = "results/ccs.json"
+        with open("file.json", "w+") as fin:
+            try:
+                ccs_json =  json.load(fin)
+            except json.JSONDecodeError:
+                ccs_json = {}
+        ccs_json[args.model_name] = ccs_json.get(args.model_name, {})
+        ccs_json[args.model_name][args.dataset_name] = {'ccs_acc': ccs_acc, 'uccs_acc': uccs_acc, 'uccs_coverage': 100.0*uccs_coverage}
+        with open(save_path, 'w') as fout:
+            json.dump(ccs_json, fout)
 
     if args.roc:
         scores = ccs.get_scores(neg_hs_test, pos_hs_test)
@@ -83,15 +95,15 @@ def main(args, generation_args):
 
         if fpr is not None and tpr is not None and roc_auc is not None:  # If it's not binary, we can't compute the ROC curve
             if args.uncertainty:
-                if not os.path.exists("Uncertainty_ROC_curves"):
-                    os.makedirs("Uncertainty_ROC_curves")
+                if not os.path.exists("results/Uncertainty_ROC_curves"):
+                    os.makedirs("results/Uncertainty_ROC_curves")
             else:
-                if not os.path.exists("ROC_curves"):
-                    os.makedirs("ROC_curves")
+                if not os.path.exists("results/ROC_curves"):
+                    os.makedirs("results/ROC_curves")
                 
-            save_path = f"ROC_curves/{args.model_name}_{args.dataset_name}.png"
-            if args.uncertainty:
-                save_path = "Uncertainty_" + save_path
+            save_path = f"results/ROC_curves/{args.model_name}_{args.dataset_name}.png"
+            # if args.uncertainty:
+            #     save_path = "Uncertainty_" + save_path
             
             plt.figure()
             lw = 2
@@ -108,9 +120,9 @@ def main(args, generation_args):
 
     if args.save_confidence_scores:
         # Save confidence scores and true labels for ROC sliding window sweep
-        save_dir = f"confidence_scores_and_labels/{args.model_name}/{args.dataset_name}"
-        if args.uncertainty:
-            args.save_dir = "Uncertainty_" + args.save_dir
+        save_dir = f"results/confidence_scores_and_labels/{args.model_name}/{args.dataset_name}"
+        # if args.uncertainty:
+        #     args.save_dir = "Uncertainty_" + args.save_dir
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
         np.save(os.path.join(save_dir, "confidence_scores.npy"), scores)

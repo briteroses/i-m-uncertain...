@@ -15,7 +15,7 @@ def get_parser():
     parser.add_argument("--dataset_name", type=str, default="imdb", help="Name of the dataset to use")
     parser.add_argument("--split", type=str, default="test", help="Which split of the dataset to use")
     parser.add_argument("--prompt_idx", type=int, default=0, help="Which prompt to use")
-    parser.add_argument("--use_custom_prompt", type=bool, default=False, help="Whether to use a custom prompt")
+    parser.add_argument("--use_custom_prompt", type=bool, default=True, help="Whether to use a custom prompt")
     parser.add_argument("--batch_size", type=int, default=1, help="Batch size to use")
     parser.add_argument("--num_examples", type=int, default=1000, help="Number of examples to generate")
     # which hidden states we extract
@@ -26,5 +26,5 @@ def get_parser():
     # saving the hidden states
     parser.add_argument("--save_dir", type=str, default="generated_hidden_states", help="Directory to save the hidden states")
     # are we in uncertainty mode?
-    parser.add_argument("--uncertainty", type=bool, default=False, help="Whether to do uncertainty experiments")
+    parser.add_argument("--uncertainty", type=bool, default=True, help="Whether to do uncertainty experiments")
     return parser
