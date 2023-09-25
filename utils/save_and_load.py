@@ -44,7 +44,6 @@ def load_single_generation(args, generation_type="labels", use_uncertainty=False
     #     save_dir = "Uncertainty_" + save_dir
     # use the same filename as in save_generations
     arg_dict = vars(args)
-    EXCLUDE_KEYS = ["save_dir", "cache_dir", "device"]
     filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in EXCLUDE_KEYS]) + ".npy".format(generation_type)
     
     # loaded_data = np.load(os.path.join(save_dir, filename))

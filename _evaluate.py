@@ -21,6 +21,8 @@ SAVE_PREFIX = ""
 def main(args, generation_args):
     if args.uncertainty:
         save_path = SAVE_PREFIX + "results/ccs.json"
+        if not os.path.exists(SAVE_PREFIX + "results"):
+            os.makedirs(SAVE_PREFIX + "results")
         with open(save_path, "w+") as fin:
             try:
                 ccs_json =  json.load(fin)
@@ -108,11 +110,11 @@ def main(args, generation_args):
 
         if fpr is not None and tpr is not None and roc_auc is not None:  # If it's not binary, we can't compute the ROC curve
             if args.uncertainty:
-                if not os.path.exists("results/Uncertainty_ROC_curves"):
-                    os.makedirs("results/Uncertainty_ROC_curves")
+                if not os.path.exists(SAVE_PREFIX + "results/Uncertainty_ROC_curves"):
+                    os.makedirs(SAVE_PREFIX + "results/Uncertainty_ROC_curves")
             else:
-                if not os.path.exists("results/ROC_curves"):
-                    os.makedirs("results/ROC_curves")
+                if not os.path.exists(SAVE_PREFIX + "results/ROC_curves"):
+                    os.makedirs(SAVE_PREFIX + "results/ROC_curves")
                 
             save_path = SAVE_PREFIX + f"results/ROC_curves/{args.model_name}_{args.dataset_name}.png"
             # if args.uncertainty:
