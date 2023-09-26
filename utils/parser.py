@@ -17,7 +17,7 @@ def get_parser():
     parser.add_argument("--prompt_idx", type=int, default=0, help="Which prompt to use")
     parser.add_argument("--use_custom_prompt", type=bool, default=True, help="Whether to use a custom prompt")
     parser.add_argument("--batch_size", type=int, default=1, help="Batch size to use")
-    parser.add_argument("--num_examples", type=int, default=1000, help="Number of examples to generate")
+    parser.add_argument("--num_examples", type=int, default=10, help="Number of examples to generate")
     # which hidden states we extract
     parser.add_argument("--use_decoder", action="store_true", help="Whether to use the decoder; only relevant if model_type is encoder-decoder. Uses encoder by default (which usually -- but not always -- works better)")
     parser.add_argument("--layer", type=int, default=-1, help="Which layer to use (if not all layers)")

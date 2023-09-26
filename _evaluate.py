@@ -15,8 +15,8 @@ import numpy as np
 
 import json
 
-SAVE_PREFIX = ""
-# SAVE_PREFIX = "/content/uncertainty/"
+# SAVE_PREFIX = ""
+SAVE_PREFIX = "/content/uncertainty/"
 
 def main(args, generation_args):
     if args.uncertainty:
@@ -101,6 +101,7 @@ def main(args, generation_args):
                 ccs_json = {}
         ccs_json[args.model_name] = ccs_json.get(args.model_name, {})
         ccs_json[args.model_name][args.dataset_name] = {'ccs_acc': ccs_acc, 'uccs_acc': uccs_acc, 'uccs_coverage': 100.0*uccs_coverage}
+        print(ccs_json)
         with open(save_path, 'w') as fout:
             json.dump(ccs_json, fout)
 
