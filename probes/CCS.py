@@ -34,10 +34,9 @@ class CCS(object):
                  verbose=False, device="cuda", linear=True, weight_decay=0.01, var_normalize=False):
         # data
         self.var_normalize = var_normalize
-        if x0 is not None and x1 is not None:
-            self.x0 = self.normalize(x0)
-            self.x1 = self.normalize(x1)
-            self.d = self.x0.shape[-1]
+        self.x0 = self.normalize(x0)
+        self.x1 = self.normalize(x1)
+        self.d = self.x0.shape[-1]
 
         # training
         self.nepochs = nepochs
@@ -59,7 +58,7 @@ class CCS(object):
             self.probe = LinearProbe(self.d)
         else:
             self.probe = MLPProbe(self.d)
-        self.probe.to(self.device)
+        return self.probe.to(self.device)
 
 
     def normalize(self, x):

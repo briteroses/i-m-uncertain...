@@ -13,6 +13,7 @@ from sklearn.metrics import auc
 import matplotlib.pyplot as plt
 import os 
 import numpy as np
+import torch
 
 import json
 
@@ -24,11 +25,11 @@ def main(args, generation_args):
         save_path = SAVE_PREFIX + "results/ccs.json"
         if not os.path.exists(SAVE_PREFIX + "results"):
             os.makedirs(SAVE_PREFIX + "results")
-        with open(save_path, "r") as fin:
-            try:
+        try:
+            with open(save_path, "r") as fin:
                 ccs_json =  json.load(fin)
-            except json.JSONDecodeError:
-                ccs_json = {}
+        except FileNotFoundError:
+            ccs_json = {}
         if args.model_name in ccs_json and args.dataset_name in ccs_json[args.model_name]:
             print(f"CCS and UCCS results for {args.model_name} and {args.dataset_name} already generated, skipping this...")
 
@@ -84,11 +85,11 @@ def main(args, generation_args):
         print(f"UCCS accuracy: {uccs_acc:4f} | UCCS coverage: {(100.0*uccs_coverage):1f}%")
         
         save_path = SAVE_PREFIX + "results/ccs.json"
-        with open(save_path, "r") as fin:
-            try:
+        try:
+            with open(save_path, "r") as fin:
                 ccs_json =  json.load(fin)
-            except json.JSONDecodeError:
-                ccs_json = {}
+        except FileNotFoundError:
+            ccs_json = {}
         ccs_json[args.model_name] = ccs_json.get(args.model_name, {})
         ccs_json[args.model_name][args.dataset_name] = {'ccs_acc': ccs_acc, 'uccs_acc': uccs_acc, 'uccs_coverage': 100.0*uccs_coverage}
         print(ccs_json)
@@ -150,13 +151,7 @@ def temporal_experiment(args, generation_args):
     
     # dividing epochs by 10 here to maintain good training dynamics; we're doing ~20 times the usual number of datasets
     # 20 <= (2 := size of full dataset / size of 50% train split) * (10 := 10 different datasets)
-    ccs = CCS(None, None, nepochs=args.nepochs/20, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
-                verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
-                var_normalize=args.var_normalize) \
-            if not args.uncertainty else \
-        UncertaintyDetectingCCS(None, None, None, nepochs=args.nepochs/20, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
-            verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
-            var_normalize=args.var_normalize)
+    ccs = None
     
     for dataset_name in DATASET_LABEL_REGISTRY.keys():
         setattr(args, 'dataset_name', dataset_name)
@@ -182,13 +177,26 @@ def temporal_experiment(args, generation_args):
                 idk_hs = idk_hs.squeeze(1)
         
         data_to_ccs = [neg_hs, pos_hs, idk_hs] if args.uncertainty else [neg_hs, pos_hs]
-        ccs.load_new_data(*data_to_ccs)
+        if ccs is None:
+            ccs = CCS(neg_hs, pos_hs, nepochs=args.nepochs//20, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
+                verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
+                var_normalize=args.var_normalize) \
+                    if not args.uncertainty else \
+                UncertaintyDetectingCCS(neg_hs, pos_hs, idk_hs, nepochs=args.nepochs//20, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
+                    verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
+                    var_normalize=args.var_normalize)
+        else:
+            ccs.load_new_data(*data_to_ccs)
+        print(f"continuing training ccs on {dataset_name}...")
         ccs.train()
         
     ccs.save_eval_probe()
 
+
     save_path = SAVE_PREFIX + f"results/{'linear' if ccs.linear else 'MLP'}/{args.model_name}_{'all' if args.temporal_experiment else args.dataset_name}.pt"
 
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
     torch.save(ccs.get_probe().state_dict(), save_path)
 
     # checkpoint = torch.load(save_path)

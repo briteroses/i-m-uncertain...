@@ -33,9 +33,9 @@ if __name__ == '__main__':
                 setattr(generation_args, 'use_custom_prompt', use_custom_prompt)
                 setattr(args, 'use_custom_prompt', use_custom_prompt)
                 if generation_args.uncertainty:
-                    print(f"Evaluating Uncertainty CCS on {model_name} model and {dataset_name} dataset {'with a custom prompt' if use_custom_prompt else ''}...")
+                    print(f"Evaluating Uncertainty CCS on {model_name} model and temporal dataset {'with a custom prompt' if use_custom_prompt else ''}...")
                 else:
-                    print(f"Evaluating baseline CCS on {model_name} model and {dataset_name} dataset {'with a custom prompt' if use_custom_prompt else ''}...")
+                    print(f"Evaluating baseline CCS on {model_name} model and temporal dataset {'with a custom prompt' if use_custom_prompt else ''}...")
                 _generate.main(generation_args)
                 _evaluate.temporal_experiment(args, generation_args)
                 print("\n\n")

@@ -12,11 +12,10 @@ class UncertaintyDetectingCCS(CCS):
                  verbose=False, device="cuda", linear=True, weight_decay=0.01, var_normalize=False):
         # data
         self.var_normalize = var_normalize
-        if x_neg is not None and x_pos is not None and x_idk is not None:
-            self.x_neg = self.normalize(x_neg)
-            self.x_pos = self.normalize(x_pos)
-            self.x_idk = self.normalize(x_idk)
-            self.d = self.x_neg.shape[-1]
+        self.x_neg = self.normalize(x_neg)
+        self.x_pos = self.normalize(x_pos)
+        self.x_idk = self.normalize(x_idk)
+        self.d = self.x_neg.shape[-1]
 
         # training
         self.nepochs = nepochs
