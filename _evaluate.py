@@ -17,8 +17,8 @@ import torch
 
 import json
 
-# SAVE_PREFIX = ""
-SAVE_PREFIX = "/content/uncertainty/"
+SAVE_PREFIX = ""
+#SAVE_PREFIX = "/content/uncertainty/"
 
 def main(args, generation_args):
     if args.uncertainty:

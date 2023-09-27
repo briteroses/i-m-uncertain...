@@ -4,6 +4,7 @@ from utils.parser import get_parser
 from data.registry import DATASET_LABEL_REGISTRY, MODEL_TYPE_REGISTRY, use_train_or_test
 import _evaluate
 import _generate
+import torch
 
 if __name__ == '__main__':
     # set up parser for the rest of the args
@@ -56,4 +57,5 @@ if __name__ == '__main__':
                     _generate.main(generation_args)
                     _evaluate.main(args, generation_args)
                     print("\n\n")
+            torch.cuda.empty_cache()  # Clear GPU memory
     print(" ~~~~~~~~~~ SUCCESS ~~~~~~~~~~ ")
