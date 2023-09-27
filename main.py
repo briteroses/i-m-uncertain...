@@ -27,20 +27,33 @@ if __name__ == '__main__':
     # iterate through all models and datasets via argparse namespace
     for use_custom_prompt in [True]:#[False, True]:
         for model_name in ['deberta', 'gpt-j', 'gpt2-large', 'T0pp', 'unifiedqa']: #MODEL_TYPE_REGISTRY.keys():
-            for dataset_name in DATASET_LABEL_REGISTRY.keys():
+            if args.temporal_experiment:
                 setattr(generation_args, 'model_name', model_name)
                 setattr(args, 'model_name', model_name)
-                setattr(generation_args, 'dataset_name', dataset_name)
-                setattr(args, 'dataset_name', dataset_name)
                 setattr(generation_args, 'use_custom_prompt', use_custom_prompt)
                 setattr(args, 'use_custom_prompt', use_custom_prompt)
-                setattr(generation_args, 'split', use_train_or_test(dataset_name))
-                setattr(args, 'split', use_train_or_test(dataset_name))
                 if generation_args.uncertainty:
                     print(f"Evaluating Uncertainty CCS on {model_name} model and {dataset_name} dataset {'with a custom prompt' if use_custom_prompt else ''}...")
                 else:
                     print(f"Evaluating baseline CCS on {model_name} model and {dataset_name} dataset {'with a custom prompt' if use_custom_prompt else ''}...")
                 _generate.main(generation_args)
-                _evaluate.main(args, generation_args)
+                _evaluate.temporal_experiment(args, generation_args)
                 print("\n\n")
+            else:
+                for dataset_name in DATASET_LABEL_REGISTRY.keys():
+                    setattr(generation_args, 'model_name', model_name)
+                    setattr(args, 'model_name', model_name)
+                    setattr(generation_args, 'dataset_name', dataset_name)
+                    setattr(args, 'dataset_name', dataset_name)
+                    setattr(generation_args, 'use_custom_prompt', use_custom_prompt)
+                    setattr(args, 'use_custom_prompt', use_custom_prompt)
+                    setattr(generation_args, 'split', use_train_or_test(dataset_name))
+                    setattr(args, 'split', use_train_or_test(dataset_name))
+                    if generation_args.uncertainty:
+                        print(f"Evaluating Uncertainty CCS on {model_name} model and {dataset_name} dataset {'with a custom prompt' if use_custom_prompt else ''}...")
+                    else:
+                        print(f"Evaluating baseline CCS on {model_name} model and {dataset_name} dataset {'with a custom prompt' if use_custom_prompt else ''}...")
+                    _generate.main(generation_args)
+                    _evaluate.main(args, generation_args)
+                    print("\n\n")
     print(" ~~~~~~~~~~ SUCCESS ~~~~~~~~~~ ")

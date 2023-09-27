@@ -10,7 +10,8 @@ GENERATION_TYPES_PLUS_IDK = GENERATION_TYPES + ["idk_hidden_states",]
 
 EXCLUDE_KEYS = ["save_dir", "cache_dir", "device", "parallelize",
                 "split", "prompt_idx", "batch_size", "num_examples",
-                "use_decoder", "layer", "all_layers", "token_idx"]
+                "use_decoder", "layer", "all_layers", "token_idx",
+                "use_custom_prompt", "uncertainty", "temporal_experiment"]
 
 def save_generations(generation, args, generation_type, use_uncertainty):
     """

@@ -19,15 +19,25 @@ class MLPProbe(nn.Module):
         o = self.linear2(h)
         return torch.sigmoid(o)
 
+class LinearProbe(nn.Module):
+    def __init__(self, d):
+        super().__init__()
+        self.linear = nn.Linear(d, 1)
+    
+    def forward(self, x):
+        preout = self.linear(x)
+        return torch.sigmoid(preout)
+
 
 class CCS(object):
     def __init__(self, x0, x1, nepochs=1000, ntries=10, lr=1e-3, batch_size=-1, 
                  verbose=False, device="cuda", linear=True, weight_decay=0.01, var_normalize=False):
         # data
         self.var_normalize = var_normalize
-        self.x0 = self.normalize(x0)
-        self.x1 = self.normalize(x1)
-        self.d = self.x0.shape[-1]
+        if x0 is not None and x1 is not None:
+            self.x0 = self.normalize(x0)
+            self.x1 = self.normalize(x1)
+            self.d = self.x0.shape[-1]
 
         # training
         self.nepochs = nepochs
@@ -46,10 +56,10 @@ class CCS(object):
         
     def initialize_probe(self):
         if self.linear:
-            self.probe = nn.Sequential(nn.Linear(self.d, 1), nn.Sigmoid())
+            self.probe = LinearProbe(self.d)
         else:
             self.probe = MLPProbe(self.d)
-        self.probe.to(self.device)    
+        self.probe.to(self.device)
 
 
     def normalize(self, x):
@@ -143,6 +153,22 @@ class CCS(object):
                 best_loss = loss
 
         return best_loss
+
+    def load_new_data(self, x0, x1):
+        self.x0 = self.normalize(x0)
+        self.x1 = self.normalize(x1)
+        self.d = self.x0.shape[-1]
+
+    def get_probe(self):
+        return self.best_probe
+
+    def load_eval_probe(self, checkpoint):
+        raw_probe = LinearProbe(self.d) if self.linear else MLPProbe(self.d)
+        raw_probe.load_state_dict(checkpoint)
+        self.best_probe = checkpoint
+
+    def save_eval_probe(self):
+        self.best_probe = copy.deepcopy(self.probe)
     
     def get_scores(self, x0_test, x1_test):
         """

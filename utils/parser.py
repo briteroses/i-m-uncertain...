@@ -27,4 +27,5 @@ def get_parser():
     parser.add_argument("--save_dir", type=str, default="generated_hidden_states", help="Directory to save the hidden states")
     # are we in uncertainty mode?
     parser.add_argument("--uncertainty", type=bool, default=True, help="Whether to do uncertainty experiments")
+    parser.add_argument("--temporal_experiment", type=bool, default=False, help="Whether to train CCS on all datasets")
     return parser
