@@ -97,7 +97,7 @@ def main(args, generation_args):
         with open(save_path, 'w') as fout:
             json.dump(ccs_json, fout)
     
-    if args.roc:
+    if args.roc and args.save_confidence_scores:
         scores = ccs.get_scores(neg_hs_test, pos_hs_test)
         fpr, tpr, roc_auc = ccs.compute_roc(scores, y_test)
 
@@ -124,11 +124,20 @@ def main(args, generation_args):
             plt.savefig(save_path)
             plt.show()
 
-    if args.save_confidence_scores:
+            # Save confidence scores and true labels for ROC sliding window sweep
+            save_dir = SAVE_PREFIX + f"results/confidence_scores_and_labels/" + ('linear' if args.linear else 'MLP') + f"/{args.model_name}/{args.dataset_name}"
+
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir)
+            np.save(os.path.join(save_dir, "confidence_scores.npy"), scores)
+            np.save(os.path.join(save_dir, "true_labels.npy"), y_test)
+
+    elif args.save_confidence_scores:
+        scores = ccs.get_scores(neg_hs_test, pos_hs_test)
+        fpr, tpr, roc_auc = ccs.compute_roc(scores, y_test)
         # Save confidence scores and true labels for ROC sliding window sweep
-        save_dir = SAVE_PREFIX + f"results/confidence_scores_and_labels/{args.model_name}/{args.dataset_name}"
-        # if args.uncertainty:
-        #     args.save_dir = "Uncertainty_" + args.save_dir
+        save_dir = SAVE_PREFIX + f"results/confidence_scores_and_labels/" + ('linear' if args.linear else 'MLP') + f"/{args.model_name}/{args.dataset_name}"
+
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
         np.save(os.path.join(save_dir, "confidence_scores.npy"), scores)
