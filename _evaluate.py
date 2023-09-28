@@ -22,9 +22,9 @@ SAVE_PREFIX = ""
 
 def main(args, generation_args):
     if args.uncertainty:
-        save_path = SAVE_PREFIX + "results/ccs.json"
-        if not os.path.exists(SAVE_PREFIX + "results"):
-            os.makedirs(SAVE_PREFIX + "results")
+        save_path = SAVE_PREFIX + "results/"+ ('linear' if args.linear else 'MLP') + "/ccs.json"
+        if not os.path.exists(SAVE_PREFIX + "results/" + ('linear' if args.linear else 'MLP')):
+            os.makedirs(SAVE_PREFIX + "results/" + ('linear' if args.linear else 'MLP'))
         try:
             with open(save_path, "r") as fin:
                 ccs_json =  json.load(fin)
@@ -32,7 +32,7 @@ def main(args, generation_args):
             ccs_json = {}
         if args.model_name in ccs_json and args.dataset_name in ccs_json[args.model_name]:
             print(f"CCS and UCCS results for {args.model_name} and {args.dataset_name} already generated, skipping this...")
-
+  
     # load hidden states and labels
     generations = load_all_generations(generation_args)
     if args.uncertainty:
@@ -83,8 +83,9 @@ def main(args, generation_args):
         uccs.repeated_train()
         uccs_acc, uccs_coverage = uccs.get_acc(neg_hs_test, pos_hs_test, idk_hs_test, y_test)
         print(f"UCCS accuracy: {uccs_acc:4f} | UCCS coverage: {(100.0*uccs_coverage):1f}%")
-        
-        save_path = SAVE_PREFIX + "results/ccs.json"
+    
+        save_path = SAVE_PREFIX + "results/"+ ('linear' if args.linear else 'MLP') + "/ccs.json"
+
         try:
             with open(save_path, "r") as fin:
                 ccs_json =  json.load(fin)
@@ -95,22 +96,20 @@ def main(args, generation_args):
         print(ccs_json)
         with open(save_path, 'w') as fout:
             json.dump(ccs_json, fout)
-
+    
     if args.roc:
         scores = ccs.get_scores(neg_hs_test, pos_hs_test)
         fpr, tpr, roc_auc = ccs.compute_roc(scores, y_test)
 
         if fpr is not None and tpr is not None and roc_auc is not None:  # If it's not binary, we can't compute the ROC curve
             if args.uncertainty:
-                if not os.path.exists(SAVE_PREFIX + "results/Uncertainty_ROC_curves"):
-                    os.makedirs(SAVE_PREFIX + "results/Uncertainty_ROC_curves")
+                if not os.path.exists(SAVE_PREFIX + "results/Uncertainty_ROC_curves/" + ('linear' if args.linear else 'MLP')):
+                    os.makedirs(SAVE_PREFIX + "results/Uncertainty_ROC_curves/" + ('linear' if args.linear else 'MLP'))
             else:
-                if not os.path.exists(SAVE_PREFIX + "results/ROC_curves"):
-                    os.makedirs(SAVE_PREFIX + "results/ROC_curves")
+                if not os.path.exists(SAVE_PREFIX + "results/ROC_curves/" + ('linear' if args.linear else 'MLP')):
+                    os.makedirs(SAVE_PREFIX + "results/ROC_curves/" + ('linear' if args.linear else 'MLP'))
                 
-            save_path = SAVE_PREFIX + f"results/ROC_curves/{args.model_name}_{args.dataset_name}.png"
-            # if args.uncertainty:
-            #     save_path = "Uncertainty_" + save_path
+            save_path = SAVE_PREFIX + f"results/ROC_curves/" + ('linear' if args.linear else 'MLP') + f"/{args.model_name}_{args.dataset_name}.png"
             
             plt.figure()
             lw = 2
@@ -138,9 +137,9 @@ def main(args, generation_args):
 
 def temporal_experiment(args, generation_args):
     if args.uncertainty:
-        save_path = SAVE_PREFIX + "results/ccs.json"
-        if not os.path.exists(SAVE_PREFIX + "results"):
-            os.makedirs(SAVE_PREFIX + "results")
+        save_path = SAVE_PREFIX + "results/"+ ('linear' if args.linear else 'MLP') + "/ccs.json"
+        if not os.path.exists(SAVE_PREFIX + "results/" + ('linear' if args.linear else 'MLP')):
+            os.makedirs(SAVE_PREFIX + "results/" + ('linear' if args.linear else 'MLP'))
         with open(save_path, "r") as fin:
             try:
                 ccs_json =  json.load(fin)
