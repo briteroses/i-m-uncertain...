@@ -11,6 +11,7 @@ with open("linear_uncertainty_ccs.json", 'r') as file:
 data_list = []
 for model, datasets in data.items():
     for dataset, metrics in datasets.items():
+        if dataset in ['dbpedia_14', 'ag_news']: continue
         metrics['model'] = model
         metrics['dataset'] = dataset
         data_list.append(metrics)
