@@ -156,6 +156,8 @@ def temporal_experiment(args, generation_args):
     if args.model_name in temporal_json:
         print(f"CCS and UCCS results for {args.model_name} and temporal dataset already generated, skipping this...")
     
+    ccs_acc, uccs_acc_raw, uccs_coverage_raw, uccs_acc_masked = None, None, None, None
+
     for set_uncertainty in [True, False]:
         setattr(generation_args, 'uncertainty', set_uncertainty)
         setattr(args, 'uncertainty', set_uncertainty)
@@ -164,6 +166,7 @@ def temporal_experiment(args, generation_args):
         # train on the ~7 original datasets
         # dividing epochs by 10 here to maintain good training dynamics; we're doing ~20 times the usual number of datasets
         # 20 <= (2 := size of full dataset / size of 50% train split) * (10 := 10 different datasets)
+        adjusted_nepochs = args.nepochs//(2*len(DATASET_LABEL_REGISTRY))
         for dataset_name in DATASET_LABEL_REGISTRY.keys():
             setattr(generation_args, 'dataset_name', dataset_name)
             setattr(args, 'dataset_name', dataset_name)
@@ -190,11 +193,11 @@ def temporal_experiment(args, generation_args):
             
             data_to_ccs = [neg_hs, pos_hs, idk_hs] if args.uncertainty else [neg_hs, pos_hs]
             if ccs is None:
-                ccs = UncertaintyDetectingCCS(neg_hs, pos_hs, idk_hs, nepochs=args.nepochs//20, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
+                ccs = UncertaintyDetectingCCS(neg_hs, pos_hs, idk_hs, nepochs=adjusted_nepochs, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
                         verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
                         var_normalize=args.var_normalize) \
                             if args.uncertainty else \
-                    CCS(neg_hs, pos_hs, nepochs=args.nepochs//20, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
+                    CCS(neg_hs, pos_hs, nepochs=adjusted_nepochs, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
                     verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
                     var_normalize=args.var_normalize)
             else:
@@ -205,8 +208,6 @@ def temporal_experiment(args, generation_args):
         ccs.save_eval_probe()
 
         # eval on temporal dataset. ccs only evaluates raw temporal set, while uccs evaluates both raw and masked (only raw has coverage <100%)
-        ccs_acc, uccs_acc_raw, uccs_coverage_raw, uccs_acc_masked = None, None, None, None
-
         if args.uncertainty:
             for set_temporal_split in ['raw', 'masked']:
                 setattr(generation_args, 'dataset_name', 'temporal')
@@ -233,6 +234,7 @@ def temporal_experiment(args, generation_args):
                 elif args.temporal_split == "masked":
                     uccs_acc_masked, uccs_coverage_masked = ccs.get_acc(*eval_inputs)
                     assert uccs_coverage_masked == 1
+            del ccs
 
         else:
             setattr(generation_args, 'dataset_name', 'temporal')
@@ -251,6 +253,8 @@ def temporal_experiment(args, generation_args):
             eval_inputs = [neg_hs, pos_hs, y]
 
             ccs_acc = ccs.get_acc(*eval_inputs)
+
+            del ccs
         
     print(f"Finished temporal experiment on {args.model_name}")
     print(f"CCS accuracy: {ccs_acc}")

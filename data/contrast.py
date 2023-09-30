@@ -165,10 +165,10 @@ class ContrastDataset(Dataset):
 
 
 class UncertaintyContrastDataset(ContrastDataset):
-    def __init__(self, idk_word="uncertain", *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         # can just use exact same init as contrast dataset
         super().__init__(*args, **kwargs)
-        self.idk_word = idk_word
+        self.idk_word = "uncertain"
 
     def __getitem__(self, index):
         neg_prompt, pos_prompt, idk_prompt = self.get_prompts_at_index(index)
@@ -232,7 +232,7 @@ def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, use_cust
                             batch_size=16, num_examples=1000,
                             model_name="deberta", use_decoder=False,
                             device="cuda", pin_memory=True, num_workers=1,
-                            use_uncertainty=False, idk_word="uncertain"):
+                            use_uncertainty=False):
     """
     Creates a dataloader for a given dataset (and its split), tokenizer, and prompt index
 
@@ -261,7 +261,7 @@ def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, use_cust
 
     # create the ConstrastDataset
     if use_uncertainty:
-        contrast_dataset = UncertaintyContrastDataset(raw_dataset, tokenizer, source_prompt, idk_word=idk_word,
+        contrast_dataset = UncertaintyContrastDataset(raw_dataset, tokenizer, source_prompt,
                                        model_name=model_name, dataset_name=dataset_name, use_decoder=use_decoder, 
                                        device=device)
     else:
