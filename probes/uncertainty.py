@@ -67,7 +67,7 @@ class UncertaintyDetectingCCS(CCS):
             predictions = predictions.int()[:, 0]
             
             if includes_uncertainty:
-                perm_acc = (predictions == y_test).float().mean()
+                perm_acc = (predictions == y_test).float().mean().item()
                 if acc < perm_acc:
                     acc = perm_acc
             else:
