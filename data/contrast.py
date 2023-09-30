@@ -12,7 +12,6 @@ from data.prompts import CustomPrompt, negAndPosLabels
 from data.registry import DATASET_LABEL_REGISTRY, MODEL_TYPE_REGISTRY, get_label_name_for_dataset, PROMPT_DICT
 
 IDK_DUMMY_LABEL = -1 # hopefully this dummy value is safe...
-IDK_ANSWER_TEXT = ["Uncertain", "I don't know"]
 
 class ContrastDataset(Dataset):
     """
@@ -169,9 +168,7 @@ class UncertaintyContrastDataset(ContrastDataset):
     def __init__(self, *args, **kwargs):
         # can just use exact same init as contrast dataset
         super().__init__(*args, **kwargs)
-        idk_text_selection = 0
-        assert idk_text_selection < len(IDK_ANSWER_TEXT), "provided index out of range of \'idk\' answer options"
-        self.idk_text_selection = idk_text_selection
+        self.idk_word = "uncertain"
 
     def __getitem__(self, index):
         neg_prompt, pos_prompt, idk_prompt = self.get_prompts_at_index(index)
@@ -214,7 +211,7 @@ class UncertaintyContrastDataset(ContrastDataset):
 
         neg_prompt, pos_prompt = self.prompt.apply(neg_example), self.prompt.apply(pos_example)
         idk_question, _ = self.prompt.apply(idk_example)
-        idk_answer = IDK_ANSWER_TEXT[self.idk_text_selection]
+        idk_answer = self.idk_word
         idk_prompt = (idk_question, idk_answer)
 
         return neg_prompt, pos_prompt, idk_prompt
@@ -242,7 +239,10 @@ def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, use_cust
     Takes a random subset of (at most) num_examples samples from the dataset that are not truncated by the tokenizer.
     """
     # load the raw dataset
-    if dataset_name != "story-cloze":
+    if dataset_name == "temporal":
+        assert split in ("raw", "masked"), "split parameter used to specify if labels are raw or temporally masked;"
+        raw_dataset = load_temporal_dataset(model_name, split, prompt_idx)
+    elif dataset_name != "story-cloze":
         raw_dataset = load_dataset(*getLoadName(dataset_name))[split]
     else:
         raw_dataset = load_dataset(*getLoadName(dataset_name), data_dir="./datasets/rawdata")[split]
@@ -260,10 +260,15 @@ def get_contrast_dataloader(dataset_name, split, tokenizer, prompt_idx, use_cust
         source_prompt = all_prompts[prompt_name_list[prompt_idx]]
 
     # create the ConstrastDataset
-    dataset_object = UncertaintyContrastDataset if use_uncertainty else ContrastDataset
-    contrast_dataset = dataset_object(raw_dataset, tokenizer, source_prompt, 
+    if use_uncertainty:
+        contrast_dataset = UncertaintyContrastDataset(raw_dataset, tokenizer, source_prompt,
                                        model_name=model_name, dataset_name=dataset_name, use_decoder=use_decoder, 
                                        device=device)
+    else:
+        contrast_dataset = ContrastDataset(raw_dataset, tokenizer, source_prompt,
+                                       model_name=model_name, dataset_name=dataset_name, use_decoder=use_decoder, 
+                                       device=device)
+    
 
     # get a random permutation of the indices; we'll take the first num_examples of these that do not get truncated
     # then, we ignore examples that would be truncated (since this messes up contrast pairs),

@@ -7,7 +7,8 @@ from utils.save_and_load import load_all_generations
 from probes.CCS import CCS, MLPProbe, LinearProbe
 from probes.uncertainty import UncertaintyDetectingCCS
 
-from data.registry import DATASET_LABEL_REGISTRY, use_train_or_test
+from data.registry import DATASET_LABEL_REGISTRY, use_train_or_test, SAVE_PREFIX
+from data.temporal import temporal_dataloader
 
 from sklearn.metrics import auc
 import matplotlib.pyplot as plt
@@ -16,9 +17,6 @@ import numpy as np
 import torch
 
 import json
-
-SAVE_PREFIX = ""
-#SAVE_PREFIX = "/content/uncertainty/"
 
 def main(args, generation_args):
     if args.uncertainty:
@@ -145,73 +143,139 @@ def main(args, generation_args):
 
 
 def temporal_experiment(args, generation_args):
-    if args.uncertainty:
-        save_path = SAVE_PREFIX + "results/"+ ('linear' if args.linear else 'MLP') + "/ccs.json"
-        if not os.path.exists(SAVE_PREFIX + "results/" + ('linear' if args.linear else 'MLP')):
-            os.makedirs(SAVE_PREFIX + "results/" + ('linear' if args.linear else 'MLP'))
-        with open(save_path, "r") as fin:
-            try:
-                ccs_json =  json.load(fin)
-            except json.JSONDecodeError:
-                ccs_json = {}
-        if args.model_name in ccs_json and "temporal" in ccs_json[args.model_name]:
-            print(f"CCS and UCCS results for {args.model_name} and temporal dataset already generated, skipping this...")
-    
-    # dividing epochs by 10 here to maintain good training dynamics; we're doing ~20 times the usual number of datasets
-    # 20 <= (2 := size of full dataset / size of 50% train split) * (10 := 10 different datasets)
-    ccs = None
-    
-    for dataset_name in DATASET_LABEL_REGISTRY.keys():
-        setattr(args, 'dataset_name', dataset_name)
-        setattr(args, 'split', use_train_or_test(dataset_name))
-        generations = load_all_generations(generation_args)
-        if args.uncertainty:
-            neg_hs = generations['neg_hs']
-            pos_hs = generations['pos_hs']
-            idk_hs = generations['idk_hs']
-            y = generations['labels']
-        else:
-            neg_hs, pos_hs, y = tuple(generations.values())
+    # apologies for the spaghetti
 
-        # Make sure the shape is correct
-        assert neg_hs.shape == pos_hs.shape
-        neg_hs, pos_hs = neg_hs[..., -1], pos_hs[..., -1]  # take the last layer
-        if neg_hs.shape[1] == 1:  # T5 may have an extra dimension; if so, get rid of it
-            neg_hs = neg_hs.squeeze(1)
-            pos_hs = pos_hs.squeeze(1)
-        if args.uncertainty:
-            idk_hs = idk_hs[..., -1]
-            if idk_hs.shape[1] == 1:
-                idk_hs = idk_hs.squeeze(1)
-        
-        data_to_ccs = [neg_hs, pos_hs, idk_hs] if args.uncertainty else [neg_hs, pos_hs]
-        if ccs is None:
-            ccs = CCS(neg_hs, pos_hs, nepochs=args.nepochs//20, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
-                verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
-                var_normalize=args.var_normalize) \
-                    if not args.uncertainty else \
-                UncertaintyDetectingCCS(neg_hs, pos_hs, idk_hs, nepochs=args.nepochs//20, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
+    save_path = SAVE_PREFIX + f"results/{'linear' if args.linear else 'MLP'}/temporal.json"
+    if not os.path.exists(SAVE_PREFIX + f"results/{'linear' if args.linear else 'MLP'}/"):
+        os.makedirs(SAVE_PREFIX + f"results/{'linear' if args.linear else 'MLP'}/")
+    try:
+        with open(save_path, "r") as fin:
+            temporal_json =  json.load(fin)
+    except FileNotFoundError:
+        temporal_json = {}
+    if args.model_name in temporal_json:
+        print(f"CCS and UCCS results for {args.model_name} and temporal dataset already generated, skipping this...")
+    
+    ccs_acc, uccs_acc_raw, uccs_coverage_raw, uccs_acc_masked = None, None, None, None
+
+    for set_uncertainty in [True, False]:
+        setattr(generation_args, 'uncertainty', set_uncertainty)
+        setattr(args, 'uncertainty', set_uncertainty)
+
+        ccs = None
+        # train on the ~7 original datasets
+        # dividing epochs by 10 here to maintain good training dynamics; we're doing ~20 times the usual number of datasets
+        # 20 <= (2 := size of full dataset / size of 50% train split) * (10 := 10 different datasets)
+        adjusted_nepochs = args.nepochs//(2*len(DATASET_LABEL_REGISTRY))
+        for dataset_name in DATASET_LABEL_REGISTRY.keys():
+            setattr(generation_args, 'dataset_name', dataset_name)
+            setattr(args, 'dataset_name', dataset_name)
+            setattr(generation_args, 'split', use_train_or_test(dataset_name))
+            setattr(args, 'split', use_train_or_test(dataset_name))
+            generations = load_all_generations(generation_args)
+            if args.uncertainty:
+                neg_hs = generations['neg_hs']
+                pos_hs = generations['pos_hs']
+                idk_hs = generations['idk_hs']
+            else:
+                neg_hs, pos_hs, _ = tuple(generations.values())
+
+            # Make sure the shape is correct
+            assert neg_hs.shape == pos_hs.shape
+            neg_hs, pos_hs = neg_hs[..., -1], pos_hs[..., -1]  # take the last layer
+            if neg_hs.shape[1] == 1:  # T5 may have an extra dimension; if so, get rid of it
+                neg_hs = neg_hs.squeeze(1)
+                pos_hs = pos_hs.squeeze(1)
+            if args.uncertainty:
+                idk_hs = idk_hs[..., -1]
+                if idk_hs.shape[1] == 1:
+                    idk_hs = idk_hs.squeeze(1)
+            
+            data_to_ccs = [neg_hs, pos_hs, idk_hs] if args.uncertainty else [neg_hs, pos_hs]
+            if ccs is None:
+                ccs = UncertaintyDetectingCCS(neg_hs, pos_hs, idk_hs, nepochs=adjusted_nepochs, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
+                        verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
+                        var_normalize=args.var_normalize) \
+                            if args.uncertainty else \
+                    CCS(neg_hs, pos_hs, nepochs=adjusted_nepochs, ntries=args.ntries, lr=args.lr, batch_size=args.ccs_batch_size, 
                     verbose=args.verbose, device=args.ccs_device, linear=args.linear, weight_decay=args.weight_decay, 
                     var_normalize=args.var_normalize)
-        else:
-            ccs.load_new_data(*data_to_ccs)
-        print(f"continuing training ccs on {dataset_name}...")
-        ccs.train()
+            else:
+                ccs.load_new_data(*data_to_ccs)
+            print(f"continuing training ccs on {dataset_name}...")
+            ccs.train()
         
-    ccs.save_eval_probe()
+        ccs.save_eval_probe()
 
+        # eval on temporal dataset. ccs only evaluates raw temporal set, while uccs evaluates both raw and masked (only raw has coverage <100%)
+        if args.uncertainty:
+            for set_temporal_split in ['raw', 'masked']:
+                setattr(generation_args, 'dataset_name', 'temporal')
+                setattr(args, 'dataset_name', 'temporal')
+                setattr(generation_args, 'temporal_split', set_temporal_split)
+                setattr(args, 'temporal_split', set_temporal_split)
 
-    save_path = SAVE_PREFIX + f"results/{'linear' if ccs.linear else 'MLP'}/{args.model_name}_{'all' if args.temporal_experiment else args.dataset_name}.pt"
+                generations = load_all_generations(generation_args)
+                neg_hs = generations['neg_hs']
+                pos_hs = generations['pos_hs']
+                idk_hs = generations['idk_hs']
+                y = generations['labels']
 
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    torch.save(ccs.get_probe().state_dict(), save_path)
+                neg_hs, pos_hs, idk_hs = neg_hs[..., -1], pos_hs[..., -1], idk_hs[..., -1]  # take the last layer
+                if neg_hs.shape[1] == 1:  # T5 may have an extra dimension; if so, get rid of it
+                    neg_hs = neg_hs.squeeze(1)
+                    pos_hs = pos_hs.squeeze(1)
+                    idk_hs = idk_hs.squeeze(1)
+                
+                eval_inputs = [neg_hs, pos_hs, idk_hs, y, args.temporal_split == 'masked']
 
-    # checkpoint = torch.load(save_path)
+                if args.temporal_split == "raw":
+                    uccs_acc_raw, uccs_coverage_raw = ccs.get_acc(*eval_inputs)
+                elif args.temporal_split == "masked":
+                    uccs_acc_masked, uccs_coverage_masked = ccs.get_acc(*eval_inputs)
+                    assert uccs_coverage_masked == 1
+            del ccs
 
-    # ccs.load_eval_probe(checkpoint)
+        else:
+            setattr(generation_args, 'dataset_name', 'temporal')
+            setattr(args, 'dataset_name', 'temporal')
+            setattr(generation_args, 'temporal_split', 'raw')
+            setattr(args, 'temporal_split', 'raw')
 
-    # # TODO finish temporal dataset, then evaluate
+            generations = load_all_generations(generation_args)
+            neg_hs, pos_hs, y = tuple(generations.values())
+
+            neg_hs, pos_hs = neg_hs[..., -1], pos_hs[..., -1]  # take the last layer
+            if neg_hs.shape[1] == 1:  # T5 may have an extra dimension; if so, get rid of it
+                neg_hs = neg_hs.squeeze(1)
+                pos_hs = pos_hs.squeeze(1)
+            
+            eval_inputs = [neg_hs, pos_hs, y]
+
+            ccs_acc = ccs.get_acc(*eval_inputs)
+
+            del ccs
+        
+    print(f"Finished temporal experiment on {args.model_name}")
+    print(f"CCS accuracy: {ccs_acc}")
+    print(f"UCCS accuracy on raw temporal set: {uccs_acc_raw:4f} | Corresponding coverage: {(100.0*uccs_coverage_raw):1f}%")
+    print(f"UCCS accuracy on masked temporal set: {uccs_acc_masked:4f}")
+
+    save_path = SAVE_PREFIX + f"results/{'linear' if args.linear else 'MLP'}/temporal.json"
+    try:
+        with open(save_path, "r") as fin:
+            temporal_json =  json.load(fin)
+    except FileNotFoundError:
+        temporal_json = {}
+    temporal_json[args.model_name] = {
+        'ccs_acc': ccs_acc,
+        'uccs_acc_raw': uccs_acc_raw,
+        'uccs_coverage_raw': 100.0 * uccs_coverage_raw,
+        'uccs_acc_masked': uccs_acc_masked
+    }
+    print(temporal_json)
+    with open(save_path, 'w') as fout:
+        json.dump(temporal_json, fout)
 
 
 if __name__ == "__main__":

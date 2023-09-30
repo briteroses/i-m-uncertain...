@@ -27,5 +27,8 @@ def get_parser():
     parser.add_argument("--save_dir", type=str, default="generated_hidden_states", help="Directory to save the hidden states")
     # are we in uncertainty mode?
     parser.add_argument("--uncertainty", type=bool, default=True, help="Whether to do uncertainty experiments")
+    # are we evaulating on our custom temporal dataset?
     parser.add_argument("--temporal_experiment", type=bool, default=False, help="Whether to train CCS on all datasets")
+    parser.add_argument("--temporal_split", type=str, default="masked", help="Whether to mask labels for samples more recent than the model training cutoff. Can be either \'raw\' or \'masked\'.")
+    parser.add_argument("--temporal_prompt_idx", type=int, default=0, help="Which prompt to use for temporal dataset")
     return parser
