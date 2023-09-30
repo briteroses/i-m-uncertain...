@@ -121,9 +121,10 @@ class CCS(object):
         batch_size = len(x0) if self.batch_size == -1 else self.batch_size
         nbatches = len(x0) // batch_size
 
+        total_loss_this_epoch = 0
         # Start training (full batch)
         for epoch in range(self.nepochs):
-            total_loss = 0
+            total_loss_this_epoch = 0
             for j in range(nbatches):
                 x0_batch = x0[j*batch_size:(j+1)*batch_size]
                 x1_batch = x1[j*batch_size:(j+1)*batch_size]
@@ -133,14 +134,14 @@ class CCS(object):
 
                 # get the corresponding loss
                 loss = self.get_loss(p0, p1)
-                total_loss += loss.item()
+                total_loss_this_epoch += loss.item()
 
                 # update the parameters
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
-        return total_loss
+        return total_loss_this_epoch
     
     def repeated_train(self):
         best_loss = np.inf
@@ -164,7 +165,7 @@ class CCS(object):
     def load_eval_probe(self, checkpoint):
         raw_probe = LinearProbe(self.d) if self.linear else MLPProbe(self.d)
         raw_probe.load_state_dict(checkpoint)
-        self.best_probe = checkpoint
+        self.best_probe = raw_probe
 
     def save_eval_probe(self):
         self.best_probe = copy.deepcopy(self.probe)

@@ -1,8 +1,11 @@
+SAVE_PREFIX = ""
+# SAVE_PREFIX = "/content/uncertainty/"
+
 DATASET_LABEL_REGISTRY = {
     "imdb": ["negative", "positive"], # This is for normal IMDB
     "amazon_polarity": ["negative", "positive"],
-    "ag_news": ["politics", "sports", "business", "technology"],
-    "dbpedia_14": ["company", "educational institution", "artist", "athlete", "office holder", "mean of transportation", "building", "natural place", "village", "animal",  "plant",  "album",  "film",  "written work"],
+    # "ag_news": ["politics", "sports", "business", "technology"],
+    # "dbpedia_14": ["company", "educational institution", "artist", "athlete", "office holder", "mean of transportation", "building", "natural place", "village", "animal",  "plant",  "album",  "film",  "written work"],
     "copa": ["choice 1", "choice 2"],
     "rte": ["yes", "no"],   # whether entail
     "boolq": ["false", "true"],

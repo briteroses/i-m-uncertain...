@@ -11,9 +11,21 @@ GENERATION_TYPES_PLUS_IDK = GENERATION_TYPES + ["idk_hidden_states",]
 EXCLUDE_KEYS = ["save_dir", "cache_dir", "device", "parallelize",
                 "split", "prompt_idx", "batch_size", "num_examples",
                 "use_decoder", "layer", "all_layers", "token_idx",
-                "use_custom_prompt", "uncertainty", "temporal_experiment"]
+                "use_custom_prompt", "uncertainty", "temporal_experiment", "temporal_prompt_idx"]
 
-def save_generations(generation, args, generation_type, use_uncertainty):
+def get_filename(args, generation_type):
+    
+    arg_dict = vars(args)
+    if args.dataset_name == 'temporal':
+        exclude_if_not_temporal = EXCLUDE_KEYS
+    else:
+        exclude_if_not_temporal = EXCLUDE_KEYS + ["temporal_split"]
+    filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in exclude_if_not_temporal]) + ".npy".format(generation_type)
+
+    return filename
+    
+
+def save_generations(generation, args, generation_type):
     """
     Input: 
         generation: numpy array (e.g. hidden_states or labels) to save
@@ -22,43 +34,29 @@ def save_generations(generation, args, generation_type, use_uncertainty):
 
     Saves the generations to an appropriate directory.
     """
-    save_dir = args.save_dir
-    # Check for uncertainty flag and modify save directory
-    # if use_uncertainty:
-    #     save_dir = "Uncertainty_" + save_dir
-    # construct the filename based on the args
-    arg_dict = vars(args)
-    filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in EXCLUDE_KEYS]) + ".npy".format(generation_type)
-
-    # create save directory if it doesn't exist
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+    if not os.path.exists(args.save_dir):
+        os.makedirs(args.save_dir)
+    filename = get_filename(args, generation_type)
 
     # save
-    np.save(os.path.join(save_dir, filename), generation)
+    np.save(os.path.join(args.save_dir, filename), generation)
 
 
-def load_single_generation(args, generation_type="labels", use_uncertainty=False):
-    save_dir = args.save_dir
-    # Check for uncertainty flag and modify load directory
-    # if use_uncertainty:
-    #     save_dir = "Uncertainty_" + save_dir
-    # use the same filename as in save_generations
-    arg_dict = vars(args)
-    filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in EXCLUDE_KEYS]) + ".npy".format(generation_type)
+def load_single_generation(args, generation_type="labels"):
     
     # loaded_data = np.load(os.path.join(save_dir, filename))
     # if generation_type == "idk_hidden_states":
     #     print("Shape of idk_hs immediately after loading in load_single_generation:", loaded_data.shape)
-    
-    return np.load(os.path.join(save_dir, filename))
+    filename = get_filename(args, generation_type)
+
+    return np.load(os.path.join(args.save_dir, filename))
 
 
 def load_all_generations(args):
     # load all the saved generations: neg_hs, pos_hs, and labels
     generations = []
     for generation_type in (GENERATION_TYPES_PLUS_IDK if args.uncertainty else GENERATION_TYPES):
-        generations.append(load_single_generation(args, generation_type=generation_type, use_uncertainty=args.uncertainty))
+        generations.append(load_single_generation(args, generation_type=generation_type))
 
     # if args.uncertainty:
     #     print(f"Shape of idk_hidden_states immediately after loading: {generations[-1].shape}")

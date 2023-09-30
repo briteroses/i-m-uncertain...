@@ -94,8 +94,10 @@ class UncertaintyDetectingCCS(CCS):
         nbatches = len(x_neg) // batch_size
 
         # Start training (full batch)
+        total_loss_this_epoch = 0
+
         for epoch in range(self.nepochs):
-            total_loss = 0
+            total_loss_this_epoch = 0
             for j in range(nbatches):
                 x_neg_batch = x_neg[j*batch_size:(j+1)*batch_size]
                 x_pos_batch = x_pos[j*batch_size:(j+1)*batch_size]
@@ -106,14 +108,14 @@ class UncertaintyDetectingCCS(CCS):
 
                 # get the corresponding loss
                 loss = self.get_loss(p_neg, p_pos, p_idk)
-                total_loss += loss.item()
+                total_loss_this_epoch += loss.item()
 
                 # update the parameters
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
-        return total_loss
+        return total_loss_this_epoch
     
     def load_new_data(self, x_neg, x_pos, x_idk):
         self.x_neg = self.normalize(x_neg)
