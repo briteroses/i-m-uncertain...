@@ -15,6 +15,10 @@ ESTIMATED_TRAINING_CUTOFFS = {
     'gpt2-large': '8/20/2019',
     'T0pp': '10/12/2021',
     'unifiedqa': '11/13/2020',
+    't5-3b': '12/14/2019',
+    'T0-3b': '9/9/2021',
+    'unifiedqa-3b': '11/13/2020',
+    'unifiedqa-v2-3b': '2/22/2022'
 }
 
 PROMPTS_FOR_TEMPORAL = [

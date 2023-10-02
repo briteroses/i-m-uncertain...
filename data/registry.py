@@ -27,6 +27,10 @@ MODEL_TYPE_REGISTRY = {
     "deberta-mnli": "encoder",
     "deberta": "encoder",
     "roberta-mnli": "encoder",
+    "t5-3b": "encoder_decoder",
+    "T0-3b": "encoder_decoder",
+    "unifiedqa-3b": "encoder_decoder",
+    "unifiedqa-v2-3b": "encoder_decoder"
 }
 
 get_label_name_for_dataset = lambda dataset_name: "label" if dataset_name != "story-cloze" else "answer_right_ending"

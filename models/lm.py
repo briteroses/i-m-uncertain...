@@ -10,7 +10,8 @@ from transformers import (
     AutoModelForSeq2SeqLM,
     AutoModelForMaskedLM,
     AutoModelWithLMHead,
-    AutoModelForSequenceClassification
+    AutoModelForSequenceClassification,
+    T5Tokenizer
 )
 
 MODEL_REGISTRY = {
@@ -26,6 +27,10 @@ MODEL_REGISTRY = {
     "deberta-mnli": ("microsoft/deberta-xxlarge-v2-mnli", "encoder", AutoModelForSequenceClassification, AutoTokenizer),
     "deberta": ("microsoft/deberta-xxlarge-v2", "encoder", AutoModelForSequenceClassification, AutoTokenizer),
     "roberta-mnli": ("roberta-large-mnli", "encoder", AutoModelForSequenceClassification, AutoTokenizer),
+    "t5-3b": ("t5-3b", "encoder_decoder", AutoModelWithLMHead, AutoTokenizer),
+    "T0-3b": ("bigscience/T0_3B", "encoder_decoder", AutoModelForSeq2SeqLM, AutoTokenizer),
+    "unifiedqa-3b": ("allenai/unifiedqa-t5-3b", "encoder_decoder", T5ForConditionalGeneration, T5Tokenizer),
+    "unifiedqa-v2-3b": ("allenai/unifiedqa-v2-t5-3b-1251000", "encoder_decoder", T5ForConditionalGeneration, T5Tokenizer)
 }
 
 MODEL_REGISTRY_NAMES = list(MODEL_REGISTRY.keys())
