@@ -1,0 +1,50 @@
+{   
+"gpt2-large": {
+    "ccs_acc": 0.5435684647302904, 
+    "uccs_acc_raw": 0.5714285969734192, 
+    "uccs_coverage_raw": 46.47302904564315, 
+    "uccs_acc_masked": 0.44813281297683716
+    },
+
+"gpt-j": {
+    "ccs_acc": 0.5228215767634855, 
+    "uccs_acc_raw": 0.53125,
+    "uccs_coverage_raw": 66.39004149377593, 
+    "uccs_acc_masked": 0.406639039516449
+    }, 
+
+"deberta": {
+    "ccs_acc": 0.5103734439834025, 
+    "uccs_acc_raw": 0.5053191184997559, 
+    "uccs_coverage_raw": 78.00829875518673, 
+    "uccs_acc_masked": 0.3609958589076996
+    }, 
+    
+"t5-3b": {
+    "ccs_acc": 0.5311203319502075, 
+    "uccs_acc_raw": 0.5639534592628479, 
+    "uccs_coverage_raw": 71.36929460580913, 
+    "uccs_acc_masked": 0.4813278317451477
+    }, 
+    
+"T0-3b": {
+    "ccs_acc": 0.5062240663900415, 
+    "uccs_acc_raw": 0.5664335489273071, 
+    "uccs_coverage_raw": 59.33609958506224, 
+    "uccs_acc_masked": 0.4356846809387207
+    }, 
+    
+"unifiedqa-3b": {
+    "ccs_acc": 0.5020746887966805, 
+    "uccs_acc_raw": 0.5521472096443176,
+    "uccs_coverage_raw": 67.63485477178423, 
+    "uccs_acc_masked": 0.406639039516449
+    }, 
+
+"unifiedqa-v2-3b": {
+    "ccs_acc": 0.5145228215767634,
+    "uccs_acc_raw": 0.5605095624923706, 
+    "uccs_coverage_raw": 65.14522821576763, 
+    "uccs_acc_masked": 0.4107884168624878
+    }
+}

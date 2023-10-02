@@ -1,0 +1,292 @@
+{
+    "gpt-j": {
+        "imdb": {
+            "ccs_acc": 0.506,
+            "uccs_acc": 0.5365853905677795,
+            "uccs_coverage": 57.4
+        },
+        "amazon_polarity": {
+            "ccs_acc": 0.516,
+            "uccs_acc": 0.5163636207580566,
+            "uccs_coverage": 55.00000000000001
+        },
+        "ag_news": {
+            "ccs_acc": 0.738,
+            "uccs_acc": 0.2894168496131897,
+            "uccs_coverage": 92.60000000000001
+        },
+        "dbpedia_14": {
+            "ccs_acc": 0.938,
+            "uccs_acc": 0.09634551405906677,
+            "uccs_coverage": 60.199999999999996
+        },
+        "copa": {
+            "ccs_acc": 0.51,
+            "uccs_acc": 0.6015625,
+            "uccs_coverage": 64.0
+        },
+        "rte": {
+            "ccs_acc": 0.506,
+            "uccs_acc": 0.5137931108474731,
+            "uccs_coverage": 57.99999999999999
+        },
+        "boolq": {
+            "ccs_acc": 0.512,
+            "uccs_acc": 0.6261681914329529,
+            "uccs_coverage": 42.8
+        },
+        "qnli": {
+            "ccs_acc": 0.52,
+            "uccs_acc": 0.54347825050354,
+            "uccs_coverage": 55.2
+        },
+        "piqa": {
+            "ccs_acc": 0.51,
+            "uccs_acc": 0.5428571701049805,
+            "uccs_coverage": 14.000000000000002
+        }
+    },
+    "gpt2-large": {
+        "imdb": {
+            "ccs_acc": 0.622,
+            "uccs_acc": 0.6223176121711731,
+            "uccs_coverage": 46.6
+        },
+        "amazon_polarity": {
+            "ccs_acc": 0.52,
+            "uccs_acc": 0.5490196347236633,
+            "uccs_coverage": 51.0
+        },
+        "ag_news": {
+            "ccs_acc": 0.742,
+            "uccs_acc": 0.29739776253700256,
+            "uccs_coverage": 53.800000000000004
+        },
+        "dbpedia_14": {
+            "ccs_acc": 0.9339999999999999,
+            "uccs_acc": 0.11258278042078018,
+            "uccs_coverage": 60.4
+        },
+        "copa": {
+            "ccs_acc": 0.52,
+            "uccs_acc": 0.523809552192688,
+            "uccs_coverage": 10.5
+        },
+        "rte": {
+            "ccs_acc": 0.53,
+            "uccs_acc": 0.56611567735672,
+            "uccs_coverage": 48.4
+        },
+        "boolq": {
+            "ccs_acc": 0.552,
+            "uccs_acc": 0.6384976506233215,
+            "uccs_coverage": 42.6
+        },
+        "qnli": {
+            "ccs_acc": 0.556,
+            "uccs_acc": 0.5629629492759705,
+            "uccs_coverage": 54.0
+        },
+        "piqa": {
+            "ccs_acc": 0.55,
+            "uccs_acc": 0.5481727719306946,
+            "uccs_coverage": 60.199999999999996
+        }
+    },
+    "deberta": {
+        "imdb": {
+            "ccs_acc": 0.934,
+            "uccs_acc": 0.847161591053009,
+            "uccs_coverage": 45.800000000000004
+        },
+        "amazon_polarity": {
+            "ccs_acc": 0.778,
+            "uccs_acc": 0.5117844939231873,
+            "uccs_coverage": 59.4
+        },
+        "ag_news": {
+            "ccs_acc": 0.774,
+            "uccs_acc": 0.2916666567325592,
+            "uccs_coverage": 57.599999999999994
+        },
+        "dbpedia_14": {
+            "ccs_acc": 0.9339999999999999,
+            "uccs_acc": 0.11897105723619461,
+            "uccs_coverage": 62.2
+        },
+        "copa": {
+            "ccs_acc": 0.545,
+            "uccs_acc": 0.5925925970077515,
+            "uccs_coverage": 40.5
+        },
+        "rte": {
+            "ccs_acc": 0.518,
+            "uccs_acc": 0.5310734510421753,
+            "uccs_coverage": 35.4
+        },
+        "boolq": {
+            "ccs_acc": 0.51,
+            "uccs_acc": 0.6195652484893799,
+            "uccs_coverage": 55.2
+        },
+        "qnli": {
+            "ccs_acc": 0.534,
+            "uccs_acc": 0.5555555820465088,
+            "uccs_coverage": 50.4
+        },
+        "piqa": {
+            "ccs_acc": 0.508,
+            "uccs_acc": 0.5458715558052063,
+            "uccs_coverage": 43.6
+        }
+    },
+    "t5-3b": {
+        "imdb": {
+            "ccs_acc": 0.936,
+            "uccs_acc": 0.9409593939781189,
+            "uccs_coverage": 54.2
+        },
+        "amazon_polarity": {
+            "ccs_acc": 0.95,
+            "uccs_acc": 0.9676113724708557,
+            "uccs_coverage": 49.4
+        },
+        "copa": {
+            "ccs_acc": 0.56,
+            "uccs_acc": 0.5690608024597168,
+            "uccs_coverage": 90.5
+        },
+        "rte": {
+            "ccs_acc": 0.514,
+            "uccs_acc": 0.5448915958404541,
+            "uccs_coverage": 64.60000000000001
+        },
+        "boolq": {
+            "ccs_acc": 0.506,
+            "uccs_acc": 0.6013985872268677,
+            "uccs_coverage": 85.8
+        },
+        "qnli": {
+            "ccs_acc": 0.542,
+            "uccs_acc": 0.5528454780578613,
+            "uccs_coverage": 24.6
+        },
+        "piqa": {
+            "ccs_acc": 0.52,
+            "uccs_acc": 0.5245901346206665,
+            "uccs_coverage": 12.2
+        }  
+    },
+    "T0-3b": {
+        "imdb": {
+            "ccs_acc": 0.5640000000000001,
+            "uccs_acc": 0.5592592358589172,
+            "uccs_coverage": 54.0
+        },
+        "amazon_polarity": {
+            "ccs_acc": 0.548,
+            "uccs_acc": 0.5559566617012024,
+            "uccs_coverage": 55.400000000000006
+        },
+        "copa": {
+            "ccs_acc": 0.5349999999999999,
+            "uccs_acc": 0.5289255976676941,
+            "uccs_coverage": 60.5
+        },
+        "rte": {
+            "ccs_acc": 0.51,
+            "uccs_acc": 0.5245901346206665,
+            "uccs_coverage": 36.6
+        },
+        "boolq": {
+            "ccs_acc": 0.502,
+            "uccs_acc": 0.5154321193695068,
+            "uccs_coverage": 64.8
+        },
+        "qnli": {
+            "ccs_acc": 0.514,
+            "uccs_acc": 0.5138339996337891,
+            "uccs_coverage": 50.6
+        },
+        "piqa": {
+            "ccs_acc": 0.53,
+            "uccs_acc": 0.5159915089607239,
+            "uccs_coverage": 93.8
+        }
+    },
+    "unifiedqa-3b": {
+        "imdb": {
+            "ccs_acc": 0.946,
+            "uccs_acc": 0.9587629437446594,
+            "uccs_coverage": 97.0
+        },
+        "amazon_polarity": {
+            "ccs_acc": 0.92,
+            "uccs_acc": 0.9430893659591675,
+            "uccs_coverage": 49.2
+        },
+        "copa": {
+            "ccs_acc": 0.51,
+            "uccs_acc": 0.523809552192688,
+            "uccs_coverage": 63.0
+        },
+        "rte": {
+            "ccs_acc": 0.656,
+            "uccs_acc": 0.7459015846252441,
+            "uccs_coverage": 24.4
+        },
+        "boolq": {
+            "ccs_acc": 0.53,
+            "uccs_acc": 0.6114649772644043,
+            "uccs_coverage": 62.8
+        },
+        "qnli": {
+            "ccs_acc": 0.506,
+            "uccs_acc": 0.5489510297775269,
+            "uccs_coverage": 57.199999999999996
+        },
+        "piqa": {
+            "ccs_acc": 0.506,
+            "uccs_acc": 0.5625,
+            "uccs_coverage": 60.8
+        }
+    },
+    "unifiedqa-v2-3b": {
+        "imdb": {
+            "ccs_acc": 0.9339999999999999,
+            "uccs_acc": 0.9375000596046448,
+            "uccs_coverage": 96.0
+        },
+        "amazon_polarity": {
+            "ccs_acc": 0.938,
+            "uccs_acc": 0.9743590354919434,
+            "uccs_coverage": 46.800000000000004
+        },
+        "copa": {
+            "ccs_acc": 0.7,
+            "uccs_acc": 0.5130434632301331,
+            "uccs_coverage": 57.49999999999999
+        },
+        "rte": {
+            "ccs_acc": 0.5900000000000001,
+            "uccs_acc": 0.6818181872367859,
+            "uccs_coverage": 13.200000000000001
+        },
+        "boolq": {
+            "ccs_acc": 0.516,
+            "uccs_acc": 0.5752212405204773,
+            "uccs_coverage": 45.2
+        },
+        "qnli": {
+            "ccs_acc": 0.512,
+            "uccs_acc": 0.5267489552497864,
+            "uccs_coverage": 48.6
+        },
+        "piqa": {
+            "ccs_acc": 0.616,
+            "uccs_acc": 0.5842450857162476,
+            "uccs_coverage": 91.4
+        }
+    }
+} 
+

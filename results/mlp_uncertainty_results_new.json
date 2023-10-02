@@ -1,0 +1,71 @@
+{
+    "deberta": {
+        "imdb": {"ccs_acc": 0.916, "uccs_acc": 0.8801742792129517, "uccs_coverage": 91.8}, 
+        "amazon_polarity": {"ccs_acc": 0.712, "uccs_acc": 0.6995515823364258, "uccs_coverage": 44.6}, 
+        "copa": {"ccs_acc": 0.525, "uccs_acc": 0.5076923370361328, "uccs_coverage": 65.0}, 
+        "rte": {"ccs_acc": 0.522, "uccs_acc": 0.5517241358757019, "uccs_coverage": 40.6}, 
+        "boolq": {"ccs_acc": 0.508, "uccs_acc": 0.5652173757553101, "uccs_coverage": 46.0}, 
+        "qnli": {"ccs_acc": 0.534, "uccs_acc": 0.5829384326934814, "uccs_coverage": 84.39999999999999}, 
+        "piqa": {"ccs_acc": 0.538, "uccs_acc": 0.5405405759811401, "uccs_coverage": 44.4}
+        }, 
+        
+    "t5-3b": {
+        "imdb": {"ccs_acc": 0.9339999999999999, "uccs_acc": 0.951020359992981, "uccs_coverage": 49.0}, 
+        "amazon_polarity": {"ccs_acc": 0.914, "uccs_acc": 0.9404255151748657, "uccs_coverage": 47.0}, 
+        "copa": {"ccs_acc": 0.52, "uccs_acc": 0.6201117038726807, "uccs_coverage": 89.5}, 
+        "rte": {"ccs_acc": 0.506, "uccs_acc": 0.596774160861969, "uccs_coverage": 12.4}, 
+        "boolq": {"ccs_acc": 0.502, "uccs_acc": 0.5936170220375061, "uccs_coverage": 94.0}, 
+        "qnli": {"ccs_acc": 0.512, "uccs_acc": 0.5648854970932007, "uccs_coverage": 26.200000000000003}, 
+        "piqa": {"ccs_acc": 0.502, "uccs_acc": 0.5228758454322815, "uccs_coverage": 30.599999999999998}
+        }, 
+    
+    "T0-3b": {
+        "imdb": {"ccs_acc": 0.54, "uccs_acc": 0.5205992460250854, "uccs_coverage": 53.400000000000006}, 
+        "amazon_polarity": {"ccs_acc": 0.5860000000000001, "uccs_acc": 0.6064981818199158, "uccs_coverage": 55.400000000000006}, 
+        "copa": {"ccs_acc": 0.54, "uccs_acc": 0.5750000476837158, "uccs_coverage": 60.0}, 
+        "rte": {"ccs_acc": 0.53, "uccs_acc": 0.5354609489440918, "uccs_coverage": 56.39999999999999}, 
+        "boolq": {"ccs_acc": 0.518, "uccs_acc": 0.5168195962905884, "uccs_coverage": 65.4}, 
+        "qnli": {"ccs_acc": 0.512, "uccs_acc": 0.5254902243614197, "uccs_coverage": 51.0}, 
+        "piqa": {"ccs_acc": 0.518, "uccs_acc": 0.5384615659713745, "uccs_coverage": 54.6}
+        }, 
+    
+    "unifiedqa-3b": {
+        "imdb": {"ccs_acc": 0.948, "uccs_acc": 0.9586776494979858, "uccs_coverage": 96.8}, 
+        "amazon_polarity": {"ccs_acc": 0.948, "uccs_acc": 0.9454545974731445, "uccs_coverage": 99.0}, 
+        "copa": {"ccs_acc": 0.525, "uccs_acc": 0.523809552192688, "uccs_coverage": 52.5}, 
+        "rte": {"ccs_acc": 0.634, "uccs_acc": 0.7468354105949402, "uccs_coverage": 47.4}, 
+        "boolq": {"ccs_acc": 0.54, "uccs_acc": 0.607692301273346, "uccs_coverage": 52.0}, 
+        "qnli": {"ccs_acc": 0.54, "uccs_acc": 0.5218340754508972, "uccs_coverage": 91.60000000000001}, 
+        "piqa": {"ccs_acc": 0.516, "uccs_acc": 0.5350877046585083, "uccs_coverage": 45.6}
+        }, 
+    
+    "unifiedqa-v2-3b": {
+        "imdb": {"ccs_acc": 0.936, "uccs_acc": 0.9576271176338196, "uccs_coverage": 47.199999999999996}, 
+        "amazon_polarity": {"ccs_acc": 0.928, "uccs_acc": 0.9466667175292969, "uccs_coverage": 45.0}, 
+        "copa": {"ccs_acc": 0.525, "uccs_acc": 0.6285714507102966, "uccs_coverage": 52.5}, 
+        "rte": {"ccs_acc": 0.562, "uccs_acc": 0.607692301273346, "uccs_coverage": 52.0}, 
+        "boolq": {"ccs_acc": 0.534, "uccs_acc": 0.625, "uccs_coverage": 60.8}, 
+        "qnli": {"ccs_acc": 0.602, "uccs_acc": 0.5551019906997681, "uccs_coverage": 49.0}, 
+        "piqa": {"ccs_acc": 0.602, "uccs_acc": 0.5886792540550232, "uccs_coverage": 53.0}
+        }, 
+        
+    "gpt2-large": {
+        "imdb": {"ccs_acc": 0.602, "uccs_acc": 0.6287553906440735, "uccs_coverage": 93.2}, 
+        "amazon_polarity": {"ccs_acc": 0.514, "uccs_acc": 0.5702478885650635, "uccs_coverage": 48.4}, 
+        "copa": {"ccs_acc": 0.505, "uccs_acc": 0.5524475574493408, "uccs_coverage": 71.5}, 
+        "rte": {"ccs_acc": 0.508, "uccs_acc": 0.5271317958831787, "uccs_coverage": 51.6}, 
+        "boolq": {"ccs_acc": 0.516, "uccs_acc": 0.6140350699424744, "uccs_coverage": 68.4}, 
+        "qnli": {"ccs_acc": 0.514, "uccs_acc": 0.5543071031570435, "uccs_coverage": 53.400000000000006}, 
+        "piqa": {"ccs_acc": 0.55, "uccs_acc": 0.5852534770965576, "uccs_coverage": 43.4}
+        }, 
+    
+    "gpt-j": {
+        "imdb": {"ccs_acc": 0.514, "uccs_acc": 0.5315614342689514, "uccs_coverage": 60.199999999999996},
+        "amazon_polarity": {"ccs_acc": 0.546, "uccs_acc": 0.5364372730255127, "uccs_coverage": 98.8}, 
+        "copa": {"ccs_acc": 0.525, "uccs_acc": 0.5274725556373596, "uccs_coverage": 45.5}, 
+        "rte": {"ccs_acc": 0.51, "uccs_acc": 0.550000011920929, "uccs_coverage": 16.0}, 
+        "boolq": {"ccs_acc": 0.536, "uccs_acc": 0.6563574075698853, "uccs_coverage": 58.199999999999996}, 
+        "qnli": {"ccs_acc": 0.532, "uccs_acc": 0.559183657169342, "uccs_coverage": 49.0}, 
+        "piqa": {"ccs_acc": 0.522, "uccs_acc": 0.5597015023231506, "uccs_coverage": 53.6}
+        }
+}

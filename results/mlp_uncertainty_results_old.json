@@ -1,0 +1,143 @@
+{
+    "deberta": {
+        "imdb": {
+            "ccs_acc": 0.94,
+            "uccs_acc": 0.8285714387893677,
+            "uccs_coverage": 42.0
+        },
+        "amazon_polarity": {
+            "ccs_acc": 0.78,
+            "uccs_acc": 0.7931034564971924,
+            "uccs_coverage": 40.6
+        },
+        "ag_news": {
+            "ccs_acc": 0.798,
+            "uccs_acc": 0.3228699564933777,
+            "uccs_coverage": 44.6
+        },
+        "dbpedia_14": {
+            "ccs_acc": 0.948,
+            "uccs_acc": 0.08181817829608917,
+            "uccs_coverage": 44.0
+        },
+        "copa": {
+            "ccs_acc": 0.56,
+            "uccs_acc": 0.529411792755127,
+            "uccs_coverage": 42.5
+        },
+        "rte": {
+            "ccs_acc": 0.502,
+            "uccs_acc": 0.5423728823661804,
+            "uccs_coverage": 82.6
+        },
+        "boolq": {
+            "ccs_acc": 0.526,
+            "uccs_acc": 0.6356589198112488,
+            "uccs_coverage": 51.6
+        },
+        "qnli": {
+            "ccs_acc": 0.526,
+            "uccs_acc": 0.6261261701583862,
+            "uccs_coverage": 44.4
+        },
+        "piqa": {
+            "ccs_acc": 0.506,
+            "uccs_acc": 0.5521472096443176,
+            "uccs_coverage": 65.2
+        }
+    },
+    "gpt-j": {
+        "imdb": {
+            "ccs_acc": 0.518,
+            "uccs_acc": 0.5291479825973511,
+            "uccs_coverage": 44.6
+        },
+        "amazon_polarity": {
+            "ccs_acc": 0.522,
+            "uccs_acc": 0.5211267471313477,
+            "uccs_coverage": 56.8
+        },
+        "ag_news": {
+            "ccs_acc": 0.762,
+            "uccs_acc": 0.27169811725616455,
+            "uccs_coverage": 53.0
+        },
+        "dbpedia_14": {
+            "ccs_acc": 0.894,
+            "uccs_acc": 0.1225806400179863,
+            "uccs_coverage": 62.0
+        },
+        "copa": {
+            "ccs_acc": 0.5549999999999999,
+            "uccs_acc": 0.5714285969734192,
+            "uccs_coverage": 59.5
+        },
+        "rte": {
+            "ccs_acc": 0.52,
+            "uccs_acc": 0.530927836894989,
+            "uccs_coverage": 77.60000000000001
+        },
+        "boolq": {
+            "ccs_acc": 0.536,
+            "uccs_acc": 0.6063829660415649,
+            "uccs_coverage": 56.39999999999999
+        },
+        "qnli": {
+            "ccs_acc": 0.558,
+            "uccs_acc": 0.5968379974365234,
+            "uccs_coverage": 50.6
+        },
+        "piqa": {
+            "ccs_acc": 0.504,
+            "uccs_acc": 0.5360824465751648,
+            "uccs_coverage": 19.400000000000002
+        }
+    },
+    "gpt2-large": {
+        "imdb": {
+            "ccs_acc": 0.61,
+            "uccs_acc": 0.6335541009902954,
+            "uccs_coverage": 90.60000000000001
+        },
+        "amazon_polarity": {
+            "ccs_acc": 0.52,
+            "uccs_acc": 0.5772727131843567,
+            "uccs_coverage": 44.0
+        },
+        "ag_news": {
+            "ccs_acc": 0.74,
+            "uccs_acc": 0.3449477255344391,
+            "uccs_coverage": 57.4
+        },
+        "dbpedia_14": {
+            "ccs_acc": 0.924,
+            "uccs_acc": 0.10486891865730286,
+            "uccs_coverage": 53.400000000000006
+        },
+        "copa": {
+            "ccs_acc": 0.505,
+            "uccs_acc": 0.5444444417953491,
+            "uccs_coverage": 90.0
+        },
+        "rte": {
+            "ccs_acc": 0.512,
+            "uccs_acc": 0.5133928656578064,
+            "uccs_coverage": 44.800000000000004
+        },
+        "boolq": {
+            "ccs_acc": 0.548,
+            "uccs_acc": 0.6038461327552795,
+            "uccs_coverage": 52.0
+        },
+        "qnli": {
+            "ccs_acc": 0.55,
+            "uccs_acc": 0.5366795063018799,
+            "uccs_coverage": 51.800000000000004
+        },
+        "piqa": {
+            "ccs_acc": 0.512,
+            "uccs_acc": 0.5196629166603088,
+            "uccs_coverage": 71.2
+        }
+    }
+}
